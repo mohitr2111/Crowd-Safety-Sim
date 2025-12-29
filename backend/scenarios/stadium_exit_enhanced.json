@@ -1,0 +1,181 @@
+{
+  "name": "Stadium Exit - Enhanced",
+  "description": "Real-world stadium scenario with dynamic crowd management",
+  "graph": {
+    "nodes": [
+      {
+        "id": "exit_main",
+        "type": "exit",
+        "position": {"x": 400, "y": 50},
+        "capacity": 50,
+        "status": "open"
+      },
+      {
+        "id": "exit_north",
+        "type": "exit",
+        "position": {"x": 400, "y": 700},
+        "capacity": 30,
+        "status": "open"
+      },
+      {
+        "id": "exit_south",
+        "type": "exit",
+        "position": {"x": 100, "y": 400},
+        "capacity": 30,
+        "status": "open"
+      },
+      {
+        "id": "exit_east",
+        "type": "exit",
+        "position": {"x": 700, "y": 400},
+        "capacity": 25,
+        "status": "open"
+      },
+      {
+        "id": "concourse",
+        "type": "general",
+        "position": {"x": 400, "y": 400},
+        "capacity": 100
+      },
+      {
+        "id": "corridor_north",
+        "type": "general",
+        "position": {"x": 400, "y": 200},
+        "capacity": 40
+      },
+      {
+        "id": "corridor_south",
+        "type": "general",
+        "position": {"x": 400, "y": 600},
+        "capacity": 40
+      },
+      {
+        "id": "zone_north",
+        "type": "zone",
+        "position": {"x": 400, "y": 800},
+        "capacity": 2500,
+        "section": "North"
+      },
+      {
+        "id": "zone_south",
+        "type": "zone",
+        "position": {"x": 200, "y": 600},
+        "capacity": 2500,
+        "section": "South"
+      },
+      {
+        "id": "zone_east",
+        "type": "zone",
+        "position": {"x": 600, "y": 600},
+        "capacity": 2500,
+        "section": "East"
+      },
+      {
+        "id": "zone_west",
+        "type": "zone",
+        "position": {"x": 100, "y": 200},
+        "capacity": 2500,
+        "section": "West"
+      }
+    ],
+    "edges": [
+      {"from": "zone_north", "to": "corridor_south", "capacity": 50},
+      {"from": "zone_south", "to": "concourse", "capacity": 50},
+      {"from": "zone_east", "to": "concourse", "capacity": 50},
+      {"from": "zone_west", "to": "corridor_north", "capacity": 50},
+      {"from": "corridor_south", "to": "concourse", "capacity": 60},
+      {"from": "corridor_north", "to": "concourse", "capacity": 60},
+      {"from": "concourse", "to": "exit_main", "capacity": 50},
+      {"from": "concourse", "to": "exit_south", "capacity": 30},
+      {"from": "concourse", "to": "exit_east", "capacity": 30},
+      {"from": "corridor_south", "to": "exit_north", "capacity": 35},
+      {"from": "corridor_north", "to": "exit_main", "capacity": 35}
+    ]
+  },
+  "stadium_config": {
+    "capacity": 10000,
+    "sections": ["North", "South", "East", "West"],
+    "exits": {
+      "exit_main": {
+        "capacity": 50,
+        "status": "open",
+        "position": "main_entrance"
+      },
+      "exit_north": {
+        "capacity": 30,
+        "status": "open",
+        "position": "north_side"
+      },
+      "exit_south": {
+        "capacity": 30,
+        "status": "open",
+        "position": "south_side"
+      },
+      "exit_east": {
+        "capacity": 25,
+        "status": "open",
+        "position": "east_side"
+      }
+    },
+    "arrival_patterns": {
+      "pre_event": {
+        "rate": 50,
+        "duration": 600,
+        "description": "Gradual arrival before event"
+      },
+      "event_start": {
+        "rate": 200,
+        "duration": 180,
+        "description": "Rush at event start"
+      },
+      "halftime": {
+        "rate": 100,
+        "duration": 300,
+        "description": "Moderate movement at halftime"
+      },
+      "event_end": {
+        "rate": 500,
+        "duration": 600,
+        "description": "Mass exodus after event"
+      }
+    }
+  },
+  "spawn_presets": {
+    "light_crowd": {
+      "total_agents": 800,
+      "distribution": {
+        "zone_north": 200,
+        "zone_south": 200,
+        "zone_east": 200,
+        "zone_west": 200
+      }
+    },
+    "moderate_crowd": {
+      "total_agents": 2000,
+      "distribution": {
+        "zone_north": 500,
+        "zone_south": 500,
+        "zone_east": 500,
+        "zone_west": 500
+      }
+    },
+    "heavy_crowd": {
+      "total_agents": 5000,
+      "distribution": {
+        "zone_north": 1250,
+        "zone_south": 1250,
+        "zone_east": 1250,
+        "zone_west": 1250
+      }
+    },
+    "peak_capacity": {
+      "total_agents": 10000,
+      "distribution": {
+        "zone_north": 2500,
+        "zone_south": 2500,
+        "zone_east": 2500,
+        "zone_west": 2500
+      }
+    }
+  }
+}
