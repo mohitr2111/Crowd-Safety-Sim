@@ -25,8 +25,9 @@ class SimulationComparison:
                 "time": state["time"],
                 "max_density": state["stats"]["max_density_reached"],
                 "active_agents": len(state["agents"]),
-                "danger_zones": len(state["danger_zones"])
+                "danger_zones": sum(1 for n in state["nodes"].values() if n.get("density", 0) > 5.0)  # ✅ NEW
             })
+
             
             if len(state["agents"]) == 0:
                 break
@@ -90,8 +91,9 @@ class SimulationComparison:
                 "time": state["time"],
                 "max_density": state["stats"]["max_density_reached"],
                 "active_agents": len(state["agents"]),
-                "danger_zones": len(state["danger_zones"])
+                "danger_zones": sum(1 for n in state["nodes"].values() if n.get("density", 0) > 5.0)  
             })
+
             
             if len(state["agents"]) == 0:
                 break

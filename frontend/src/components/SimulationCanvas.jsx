@@ -1,10 +1,10 @@
-// frontend/src/components/SimulationCanvas.jsx
-
-import React, { useEffect, useRef, useState } from 'react'; // ✅ ADD useState
+import React, { useEffect, useRef, useState } from 'react';
+import FloorPlanCanvas from './FloorPlanCanvas';
 
 const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
   const canvasRef = useRef(null);
   const [simulation, setSimulation] = useState(null);
+  const [viewMode, setViewMode] = useState('floorplan'); // ✅ Default to floor plan
 
   // Helper function to get gradient color based on density
   const getDensityColor = (density, maxDensity = 6.0) => {
@@ -81,7 +81,8 @@ const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
     });
   };
 
-  useEffect(() => {
+  // ✅ GRAPH VIEW RENDERING
+  const renderGraphView = () => {
     if (!graphData || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -95,7 +96,7 @@ const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
     ctx.fillStyle = '#f9fafb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // ✅ UPDATED: Layout nodes in a circle pattern if no x,y coordinates
+    // Layout nodes in a circle pattern if no x,y coordinates
     const nodes = graphData.nodes.map((node, idx) => {
       if (node.x && node.y) {
         return node; // Use existing coordinates
@@ -133,7 +134,7 @@ const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
       const y = node.y;
       const radius = getNodeRadius(node.type, node.capacity);
 
-      // ✅ UPDATED: Support both state formats
+      // Support both state formats
       let agentCount = 0;
       let density = 0;
 
@@ -231,7 +232,7 @@ const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
       }
     });
 
-    // ✅ UPDATED: Draw agents (support both formats)
+    // Draw agents (support both formats)
     const agents = state?.agents || {};
     const agentEntries = Array.isArray(agents) 
       ? agents.map((a, i) => [i, a]) 
@@ -275,30 +276,77 @@ const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
 
     // Draw legend
     drawLegend(ctx, canvas.width, canvas.height);
+  };
 
-  }, [graphData, state, width, height]);
+  // ✅ Re-render when state changes
+  useEffect(() => {
+    if (viewMode === 'graph') {
+      renderGraphView();
+    }
+  }, [graphData, state, width, height, viewMode]);
 
+  // ✅ RENDER: Floor Plan or Graph View
   return (
     <div className="relative">
-      <canvas
-        ref={canvasRef}
-        className="border-2 border-gray-300 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg"
-      />
-      
-      {/* Overlay stats */}
-      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border-2 border-gray-200">
-        <div className="text-xs font-semibold text-gray-700 mb-1">Live Statistics</div>
-        <div className="text-sm">
-          <span className="font-bold text-blue-600">
-            {state?.agents ? (Array.isArray(state.agents) ? state.agents.length : Object.keys(state.agents).length) : 0}
-          </span>
-          <span className="text-gray-600"> active agents</span>
-        </div>
-        <div className="text-sm">
-          <span className="font-bold text-green-600">{state?.reached_goal || 0}</span>
-          <span className="text-gray-600"> reached goal</span>
-        </div>
+      {/* View Toggle Buttons */}
+      <div className="mb-4 flex gap-2 justify-center">
+        <button 
+          onClick={() => setViewMode('floorplan')}
+          className={`px-4 py-2 rounded-lg font-semibold shadow-md transition-all ${
+            viewMode === 'floorplan' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          🏛️ Floor Plan View
+        </button>
+        <button 
+          onClick={() => setViewMode('graph')}
+          className={`px-4 py-2 rounded-lg font-semibold shadow-md transition-all ${
+            viewMode === 'graph' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          🔵 Graph View
+        </button>
       </div>
+
+      {/* Canvas Container */}
+      {viewMode === 'floorplan' ? (
+        // In SimulationCanvas.jsx or LiveMonitor.jsx
+
+      <div className="w-full overflow-auto max-h-[700px]">
+        <FloorPlanCanvas 
+          graphData={graphData} 
+          state={state} 
+          width={800}
+        />
+      </div>
+
+      ) : (
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="border-2 border-gray-300 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg"
+          />
+          
+          {/* Overlay stats */}
+          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border-2 border-gray-200">
+            <div className="text-xs font-semibold text-gray-700 mb-1">Live Statistics</div>
+            <div className="text-sm">
+              <span className="font-bold text-blue-600">
+                {state?.agents ? (Array.isArray(state.agents) ? state.agents.length : Object.keys(state.agents).length) : 0}
+              </span>
+              <span className="text-gray-600"> active agents</span>
+            </div>
+            <div className="text-sm">
+              <span className="font-bold text-green-600">{state?.reached_goal || 0}</span>
+              <span className="text-gray-600"> reached goal</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
