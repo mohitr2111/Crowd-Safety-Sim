@@ -4,7 +4,6 @@ from simulation.simulator import Simulator
 from rl.q_learning_agent import CrowdSafetyQLearning
 import numpy as np
 
-
 class RLTrainer:
     """Train RL agent using simulation"""
     
@@ -116,20 +115,20 @@ class RLTrainer:
                 # Only reroute agents heading TO this node or currently in path
                 if (agent.get_next_node() == node_id or node_id in (agent.path or [])):
                     # Find all exit nodes
-                    exit_nodes = [n for n, data in sim.twin.node_data.items() 
+                    exit_nodes = [n for n, data in sim.digital_twin.node_data.items() 
                                 if data["type"] == "exit" and n != agent.goal_node]
                     
                     if exit_nodes:
                         # Pick least crowded exit
                         alt_exit = min(exit_nodes, 
-                                    key=lambda n: sim.twin.node_data[n]["density"])
+                                    key=lambda n: sim.digital_twin.node_data[n]["density"])
                         
                         # Only reroute if alternative is less crowded
-                        current_exit_density = sim.twin.node_data.get(agent.goal_node, {}).get("density", 999)
-                        alt_exit_density = sim.twin.node_data[alt_exit]["density"]
+                        current_exit_density = sim.digital_twin.node_data.get(agent.goal_node, {}).get("density", 999)
+                        alt_exit_density = sim.digital_twin.node_data[alt_exit]["density"]
                         
                         if alt_exit_density < current_exit_density - 0.5:
-                            alt_path = sim.twin.get_shortest_path(agent.current_node, alt_exit)
+                            alt_path = sim.digital_twin.get_shortest_path(agent.current_node, alt_exit)
                             if alt_path:
                                 agent.set_path(alt_path)
                                 agent.goal_node = alt_exit
