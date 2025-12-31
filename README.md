@@ -18,12 +18,11 @@ every action (rerouting, inflow reduction, gate closure) affects how the crowd e
 Because of this, the system is modeled using Reinforcement Learning (RL).
 
 # For Round 1, we implemented a Q-Learning–based policy that:
--observes crowd density and occupancy states
--selects from a small set of human-interpretable interventions
--optimizes for safety metrics such as peak density, violations, and evacuation time
--This approach allows the platform to learn intervention timing, not just react to thresholds.
--The focus in Round 1 is to validate the idea:
-that policy-based AI control can outperform passive or rule-based crowd monitoring.
+- observes crowd density and occupancy states
+- selects from a small set of human-interpretable interventions
+- optimizes for safety metrics such as peak density, violations, and evacuation time
+- This approach allows the platform to learn intervention timing, not just react to thresholds.
+- The focus in Round 1 is to validate the idea: that policy-based AI control can outperform passive or rule-based crowd monitoring.
 
 # Roadmap
 - In subsequent rounds, this RL layer will be extended to Deep RL (DQN / PPO) to support:
