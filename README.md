@@ -16,15 +16,14 @@ Large venues (stadiums, railway stations, festivals) often react *after* dangero
 - The problem is inherently sequential:
 every action (rerouting, inflow reduction, gate closure) affects how the crowd evolves in the next moments.
 Because of this, the system is modeled using Reinforcement Learning (RL).
-
-# For Round 1, we implemented a Q-Learning–based policy that:
+**For Round 1, we implemented a Q-Learning–based policy that:**
 - observes crowd density and occupancy states
 - selects from a small set of human-interpretable interventions
 - optimizes for safety metrics such as peak density, violations, and evacuation time
 - This approach allows the platform to learn intervention timing, not just react to thresholds.
 - The focus in Round 1 is to validate the idea: that policy-based AI control can outperform passive or rule-based crowd monitoring.
 
-# Roadmap
+**Roadmap**
 - In subsequent rounds, this RL layer will be extended to Deep RL (DQN / PPO) to support:
 - larger venues
 - continuous state representations
@@ -102,7 +101,7 @@ For each simulation step:
 - Agents reached goal: 1100
 
 **Improvement**
-- Prevented sustained density beyond 4.5 p/m², the internationally recognized danger threshold.”
+- Prevented sustained density beyond 4.5 p/m².”
 - Violations prevented: 2
 - Time saved: 4s
 
@@ -198,7 +197,7 @@ backend/
   main.py            # FastAPI API
   simulation/        # simulator, digital twin, agents, scenarios
   rl/                # q-learning agent, training, comparison runner
-  ai/                # Not Fully Implemented
+  ai/                # Reserved for future model extensions
 frontend/
   src/components/    # canvas view, scenario builder, dashboards
 docs/
