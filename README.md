@@ -259,3 +259,10 @@ docs/
   Rl_training_history
 
 ---
+
+### CONTRIBUTIONS
+
+## Member1 -> Frontend
+## Member2 -> Backend
+## Member3 -> RL training and Comparisons
+## Member4 -> Research and Documentations
