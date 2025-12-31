@@ -213,3 +213,13 @@ docs/
 ## Member2 -> Backend
 ## Member3 -> RL training and Comparisons
 ## Member4 -> Research and Documentations
+
+## Visual Evidence (Simulation & Results)
+
+> The following visuals are generated directly from the running system
+> and are included in `/docs` for reproducibility.
+
+![Density Heatmap](docs/Heat_Map.png)
+![Baseline vs AI Density Over Time](docs/Model_Test.png)
+![Baseline vs AI Density Over Time](docs/Model_Test(2).png)
+![AI Action Timeline](docs/AI_recommendations.png)
