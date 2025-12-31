@@ -137,7 +137,9 @@ Open: http://localhost:5173
 > (Leave placeholders here if you want to fill later)
 
 ### ✅ Round 2 Goals
-    Photo/Blueprint → Auto Venue Graph (“Photo‑to‑Layout”)
+
+
+### A) Photo/Blueprint → Auto Venue Graph (“Photo‑to‑Layout”)
 **Goal:** Upload a venue blueprint/photo and auto-generate the digital twin (zones/exits/paths).
 
 **What will be added**
@@ -150,7 +152,7 @@ Open: http://localhost:5173
 - **Optional OCR:** Tesseract (to read measurements/labels)
 - **Frontend:** React canvas annotation (Konva.js / Fabric.js) + drag handles
 - **Storage:** S3/Cloud storage for uploaded images
-- **Output format:** JSON scenario compatible with simulator [file:46]
+- **Output format:** JSON scenario compatible with simulator
 
 ---
 
@@ -174,7 +176,7 @@ Open: http://localhost:5173
 - RL will learn *different* optimal actions for different emergencies because the environment dynamics change.
 ---
 
-### D) Better RL Training (more scenarios, multi‑seed evaluation, stable learning)
+### C) Better RL Training (more scenarios, multi‑seed evaluation, stable learning)
 **Goal:** Make the RL policy robust, consistent, and judge-proof.
 
 **What will be added**
@@ -191,7 +193,7 @@ Open: http://localhost:5173
 - **Experiment tracking:** MLflow or simple JSON logs
 - **CI:** automated benchmark tests before merge
 
-### F) RL Model Working Real Case Studies (mandatory-impact feature)
+### D) RL Model Working Real Case Studies (mandatory-impact feature)
 **Goal:** Prove usefulness via realistic case-study packs.
 
 **What will be added**
@@ -210,14 +212,14 @@ Open: http://localhost:5173
 - Frontend storytelling view (timeline + charts)
 - Backend report export endpoint (downloadable artifact)
 
-## Round 2: Trigger‑Aware Optimization (Model will get better at all triggers)
+### E: Trigger‑Aware Optimization (Model will get better at all triggers)
 In Round 2, the RL model will be trained and evaluated on **triggered environments** (fire, bomb threat, gate malfunction, medical emergency), where triggers modify:
 - path availability (blocked edges)
 - movement speed (panic)
 - inflow spikes (surge)
 - exit capacities (partial closures)
 
-This makes the learned policy **trigger-aware**, improving decisions beyond pure density thresholds. [file:53]
+This makes the learned policy **trigger-aware**, improving decisions beyond pure density thresholds. 
 
 ---
 ---
