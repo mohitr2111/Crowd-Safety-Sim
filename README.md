@@ -11,23 +11,27 @@ Large venues (stadiums, railway stations, festivals) often react *after* dangero
 - Real‑time metrics: max density, agents evacuated, danger zones, violations.
 
 ### 2) AI Intervention Layer (Q‑Learning)
-We trained a Q‑Learning policy that chooses actions based on discretized crowd state:
-- Actions: `no_action`, `reduce_inflow_25`, `reduce_inflow_50`, `close_inflow`, `reroute_to_alt_exit`
-- Goal: reduce max density + reduce danger zones/violations + reduce evacuation time.
+- To move beyond passive monitoring, we introduce an AI-driven intervention layer that actively controls crowd flow in real time.
 
-### For Round 1, we intentionally used tabular Q-Learning due to the following trade-offs:
+- The problem is inherently sequential:
+every action (rerouting, inflow reduction, gate closure) affects how the crowd evolves in the next moments.
+Because of this, the system is modeled using Reinforcement Learning (RL).
 
-- Interpretability (critical for safety systems)
-- State → Action mappings are explicit and debuggable
-- This is important for real-world adoption where black-box policies are risky
+# For Round 1, we implemented a Q-Learning–based policy that:
+-observes crowd density and occupancy states
+-selects from a small set of human-interpretable interventions
+-optimizes for safety metrics such as peak density, violations, and evacuation time
+-This approach allows the platform to learn intervention timing, not just react to thresholds.
+-The focus in Round 1 is to validate the idea:
+that policy-based AI control can outperform passive or rule-based crowd monitoring.
 
+# Roadmap
+- In subsequent rounds, this RL layer will be extended to Deep RL (DQN / PPO) to support:
+- larger venues
+- continuous state representations
+- trigger-aware optimization (panic, surges, blockages)
 
-Q-Learning is well-suited for low-dimensional, discrete control problems like this.
-
-Strong baseline for policy comparison
-Using Q-Learning establishes a clear, explainable baseline policy that future models must outperform — rather than jumping straight to complex deep RL without reference.
-
-We will Implement Deep RL (DQN/PPO) in Round 2 That is includes in ROADMAP.md
+(Planned enhancements are detailed in ROADMAP.md.)
 
 ### 3) Frontend Dashboard (React)
 - Live heatmap visualization (node density color map)
@@ -99,7 +103,7 @@ For each simulation step:
 - Agents reached goal: 1100
 
 **Improvement**
-- Density reduction: 8.5%
+- Prevented sustained density beyond 4.5 p/m², the internationally recognized danger threshold.”
 - Violations prevented: 2
 - Time saved: 4s
 
