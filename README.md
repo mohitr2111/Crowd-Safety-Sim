@@ -1,4 +1,4 @@
-# AI‑Powered Crowd Safety Platform
+# AI‑Powered Crowd Safety Platform (Domain: AI / Machine Learning)
 Predictive AI for stampede prevention + real‑time crowd flow interventions
 
 ## Why this exists (Problem)
