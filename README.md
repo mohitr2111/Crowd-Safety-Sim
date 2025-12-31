@@ -219,7 +219,7 @@ docs/
 > The following visuals are generated directly from the running system
 > and are included in `/docs` for reproducibility.
 
-![Density Heatmap](docs/Heat_Map.png)
-![Baseline vs AI Density Over Time](docs/Model_Test.png)
-![Baseline vs AI Density Over Time](docs/Model_Test(2).png)
-![AI Action Timeline](docs/AI_recommendations.png)
+![Density Heatmap](Docs/Heat_Map.png)
+![Baseline vs AI Density Over Time](Docs/Model_Test.png)
+![Baseline vs AI Density Over Time](Docs/Model_Test(2).png)
+![AI Action Timeline](Docs/AI_recommendations.png)
