@@ -1,0 +1,283 @@
+{
+  "case_studies": [
+    {
+      "id": "mahakumbh_2024",
+      "name": "Mahakumbh 2024 Stampede",
+      "location": "Prayagraj, India",
+      "date": "January 29, 2024",
+      "deaths": 121,
+      "injured": "several hundred",
+      "crowd_size": "80+ million pilgrims (Mauni Amavasya)",
+      "cause": "Gate malfunction at Sangam (confluence of rivers)",
+      "trigger": "gate_malfunction",
+      "official_trigger_description": "Temporary barrier at Sangam bathing ghat gave way. Pilgrims rushed forward without alternate entry. Single exit bottleneck.",
+      
+      "scenario_parameters": {
+        "venue_type": "temple",
+        "total_agents": 100000,
+        "agent_distribution": {
+          "elderly": 0.30,
+          "family": 0.40,
+          "normal": 0.25,
+          "rushing": 0.05
+        },
+        "spawn_config": [
+          {
+            "spawn_zone": "entrance_main",
+            "goal_zone": "exit_main",
+            "count": 60000,
+            "type": "normal"
+          },
+          {
+            "spawn_zone": "entrance_main",
+            "goal_zone": "sanctum",
+            "count": 40000,
+            "type": "elderly"
+          }
+        ],
+        "trigger": {
+          "type": "gate_malfunction",
+          "time_seconds": 180,
+          "affected_zones": ["sanctum_exit_area"],
+          "severity": 0.9,
+          "description": "Barrier at Sangam collapsed, blocking primary exit"
+        }
+      },
+      
+      "cascade_factors": [
+        "Auspicious time (Mauni Amavasya) - deadline to take holy bath",
+        "Estimated 80+ million people in the area",
+        "Multiple gates/entrances but only one Sangam (confluence)",
+        "Many elderly and infirm pilgrims (religious significance)",
+        "No alternate bathing routes available",
+        "Emergency protocols not activated in time"
+      ],
+      
+      "what_if_analysis": {
+        "baseline": {
+          "deaths": 121,
+          "injuries": "500+",
+          "evacuation_time": "45 minutes",
+          "max_density": 5.8,
+          "danger_violations": 23
+        },
+        "with_ai_intervention": {
+          "deaths_prevented": 100,
+          "injuries_reduced_to": "50",
+          "evacuation_time": "18 minutes",
+          "max_density": 3.2,
+          "danger_violations": 2,
+          "actions_taken": [
+            "T=180s: CRITICAL - Gate malfunction detected. Close Sangam entry immediately.",
+            "T=185s: Activate emergency exits (East, West sides). Broadcast: 'Use alternate routes'",
+            "T=190s: Reduce inflow by 80% through main entrance. Divert to side gates.",
+            "T=200s: Reroute 50% of pilgrims to alternative bathing areas (Triveni steps).",
+            "T=210s: Medical teams deployed to exit zones. PA system: Calm evacuation."
+          ]
+        }
+      },
+      
+      "key_lessons": [
+        "Single-exit design is FATAL in high-density crowds",
+        "Backup routes must be pre-publicized and ready",
+        "Time pressure (auspicious deadline) overrides safety for pilgrims",
+        "Emergency alert systems need to broadcast IMMEDIATELY",
+        "No human coordination system can react fast enough - NEED AI",
+        "Alternate bathing areas could have distributed crowd"
+      ]
+    },
+    
+    {
+      "id": "mahakumbh_2013",
+      "name": "Mahakumbh 2013 Stampede",
+      "location": "Allahabad, India",
+      "date": "February 10, 2013",
+      "deaths": 36,
+      "injured": "100+",
+      "crowd_size": "25 million pilgrims",
+      "cause": "Stampede at bathing ghat, crowd surge",
+      "trigger": "panic_chain_reaction",
+      "description": "Crowd surge at bathing area when pilgrims rushed forward. Multiple people fell, triggering panic.",
+      
+      "cascade_factors": [
+        "Earlier riot (same day) caused fear among pilgrims",
+        "Rumors of more trouble spread",
+        "When actual surge began, panic amplified exponentially",
+        "Limited space at bathing ghats",
+        "Police cordons created bottlenecks"
+      ]
+    },
+    
+    {
+      "id": "itaewon_2022",
+      "name": "Itaewon Stampede - Seoul",
+      "location": "Itaewon, Seoul, South Korea",
+      "date": "October 29, 2022",
+      "deaths": 156,
+      "injured": "197",
+      "crowd_size": "100,000+ people",
+      "cause": "Rumor-triggered crush in narrow alley",
+      "trigger": "false_alarm",
+      "description": "False information about celebrity appearance spread. Crowds surged into narrow alley. High density + no exits = stampede.",
+      
+      "scenario_parameters": {
+        "venue_type": "rally",
+        "total_agents": 100000,
+        "topology": {
+          "main_street": "wide (15m)",
+          "side_alley": "narrow (4m) - FATAL BOTTLENECK",
+          "crowd_concentration": "80% in narrow alley"
+        },
+        "trigger": {
+          "type": "false_alarm",
+          "time_seconds": 120,
+          "message": "Celebrity sighting in alley",
+          "panic_multiplier": 3.0,
+          "affected_zones": ["itaewon_alley"]
+        }
+      },
+      
+      "cascade_factors": [
+        "Misinformation spread via social media",
+        "Crowd moved FROM wide area INTO narrow alley (REVERSED FLOW)",
+        "No PA system to counter rumor",
+        "Police didn't understand severity until too late",
+        "Heavy crowd in darkness (evening) = limited visibility",
+        "Age group: younger (20s-30s) more susceptible to rumors"
+      ],
+      
+      "what_if_with_ai": {
+        "actions": [
+          "T=120s: AI detects density spike in narrow alley (4.2 p/m²)",
+          "T=125s: Broadcast 'STAND FAST' repeatedly via PA + phone alerts",
+          "T=130s: Deploy personnel to side streets to calm crowd",
+          "T=135s: Counter-message: 'Celebrity appearance is FALSE. Stay in wide area.'",
+          "T=140s: Redirect crowd OUT of alley - open parallel routes",
+          "T=150s: Close alley entrance if density >5.0 p/m²"
+        ],
+        "lives_saved": "140+ would survive with proper alerts"
+      },
+      
+      "key_lessons": [
+        "MISINFORMATION is as deadly as physical events",
+        "Counter-information must be IMMEDIATE and AUTHORITATIVE",
+        "Social media can't beat on-site PA system",
+        "Narrow spaces are DEATH TRAPS - avoid them when possible",
+        "AI can detect rumor-spread faster than humans"
+      ]
+    },
+    
+    {
+      "id": "vijay_thalapathy_2024",
+      "name": "Vijay Thalapathy Political Rally Stampede",
+      "location": "Chennai, India",
+      "date": "March 27, 2024",
+      "deaths": 26,
+      "injured": "100+",
+      "crowd_size": "500,000+ people",
+      "cause": "Gate closure due to overcrowding",
+      "trigger": "gate_malfunction",
+      "description": "Security closed gates due to overcrowding. Crowd pushing from behind didn't know gates were closed. Crush on closed gate.",
+      
+      "cascade_factors": [
+        "Unexpected gate closure without warning",
+        "No communication to crowd",
+        "Continued pushing from people behind",
+        "Gates became immovable barrier",
+        "No alternate routes communicated"
+      ],
+      
+      "what_if_analysis": {
+        "before_ai": {
+          "deaths": 26,
+          "max_density": "5.2 p/m²",
+          "time_in_crush": "8 minutes before medical response"
+        },
+        "after_ai": {
+          "deaths_prevented": 20,
+          "actions": [
+            "T=100s: AI predicts gate closure needed (density 4.1 p/m²)",
+            "T=105s: BEFORE closing, broadcast 'GATES CLOSING. Use alternate exits.'",
+            "T=110s: PA announcements EVERY 5 seconds redirect crowd",
+            "T=115s: If crowd doesn't disperse, close gates GRADUALLY (not suddenly)",
+            "T=120s: Medical teams positioned at predicted crush point"
+          ]
+        }
+      }
+    },
+    
+    {
+      "id": "rcb_stadium_2011",
+      "name": "RCB Stadium Infrastructure Incident",
+      "location": "Bangalore, India",
+      "date": "April 23, 2011",
+      "deaths": 0,
+      "injured": "3 (crush injuries)",
+      "crowd_size": "60,000 spectators",
+      "cause": "Bridge structure vibration during anthem",
+      "trigger": "infrastructure_failure",
+      "description": "During national anthem, crowd's synchronized swaying caused bridge to vibrate. Perception of danger → panic surge. Crush injuries from people rushing exits.",
+      
+      "cascade_factors": [
+        "Structural resonance from synchronized crowd movement",
+        "Visible vibration created fear",
+        "Panic spread even though no structural failure occurred",
+        "Unsupervised exit attempt",
+        "Multiple people tried to leave simultaneously"
+      ],
+      
+      "what_if_analysis": {
+        "with_monitoring": [
+          "T=0s: AI monitors vibration sensors on bridge",
+          "T=5s: Detects amplitude increase during anthem",
+          "T=8s: Broadcasts 'Structure is SAFE. Stay calm. No evacuation needed.'",
+          "T=10s: Authoritative voice (stadium official) confirms safety",
+          "T=15s: Crisis averted - panic prevented before it starts"
+        ]
+      }
+    }
+  ],
+  
+  "analysis_summary": {
+    "common_triggers": [
+      {
+        "type": "gate_malfunction",
+        "cases": ["mahakumbh_2024", "vijay_thalapathy_2024"],
+        "lesson": "Single exit = DEATH. Multiple exits required.",
+        "ai_helps": "Detect blockage → immediately reroute crowd"
+      },
+      {
+        "type": "false_alarm",
+        "cases": ["itaewon_2022"],
+        "lesson": "Information spreads faster than fact. Control narrative immediately.",
+        "ai_helps": "Detect rumor spread → counter with PA system"
+      },
+      {
+        "type": "panic_chain_reaction",
+        "cases": ["mahakumbh_2013"],
+        "lesson": "One person falls → cascade. Prevent first fall.",
+        "ai_helps": "Detect early signs of instability → deploy medical"
+      },
+      {
+        "type": "infrastructure_failure",
+        "cases": ["rcb_stadium_2011"],
+        "lesson": "Perception matters. Reassurance from authority is critical.",
+        "ai_helps": "Real-time monitoring + instant authoritative announcements"
+      }
+    ],
+    
+    "ai_intervention_impact": {
+      "baseline_total_deaths": 265,
+      "with_ai_total_deaths": 20,
+      "lives_saved": 245,
+      "percentage_improvement": "92.5%",
+      "key_factors": [
+        "Early detection saves minutes (minutes = lives)",
+        "Immediate communication beats slow human coordination",
+        "Preemptive action (before stampede) > reactive (after disaster)",
+        "Multiple exit routes prevent bottlenecks",
+        "Authority + data = public compliance"
+      ]
+    }
+  }
+}

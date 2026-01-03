@@ -1,0 +1,112 @@
+{
+  "baseline": {
+    "max_density": 4.775,
+    "danger_violations": 7,
+    "evacuation_time": 63.0,
+    "agents_reached": 1100
+  },
+  "optimized": {
+    "max_density": 4.85,
+    "danger_violations": 7,
+    "evacuation_time": 57.0,
+    "agents_reached": 1100
+  },
+  "improvements": {
+    "density_reduction_percent": -1.5706806282722363,
+    "danger_violations_prevented": 0,
+    "time_difference": -6.0
+  },
+  "actions_taken": [
+    {
+      "time": 2.0,
+      "node": "corridor_south",
+      "density": 1.85,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 5.0,
+      "node": "exit_main",
+      "density": 1.7333333333333334,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: -3.02)"
+    },
+    {
+      "time": 7.0,
+      "node": "exit_side_2",
+      "density": 1.92,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: -3.02)"
+    },
+    {
+      "time": 8.0,
+      "node": "exit_side_2",
+      "density": 1.96,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: -3.02)"
+    },
+    {
+      "time": 13.0,
+      "node": "exit_main",
+      "density": 1.5333333333333334,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: -3.02)"
+    },
+    {
+      "time": 13.0,
+      "node": "corridor_north",
+      "density": 2.275,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 14.0,
+      "node": "corridor_north",
+      "density": 1.925,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 15.0,
+      "node": "corridor_north",
+      "density": 1.55,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 18.0,
+      "node": "corridor_south",
+      "density": 2.3,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 19.0,
+      "node": "corridor_south",
+      "density": 2.25,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 20.0,
+      "node": "corridor_south",
+      "density": 2.225,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 21.0,
+      "node": "corridor_south",
+      "density": 1.975,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    },
+    {
+      "time": 22.0,
+      "node": "corridor_south",
+      "density": 1.7,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 34.97)"
+    }
+  ]
+}

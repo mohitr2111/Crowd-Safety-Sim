@@ -1,0 +1,8 @@
+{
+  "projectId": "cc2aa872-69f7-4087-a487-c62704be3152",
+  "createdAt": 1767447729130,
+  "startupCommands": [
+    "python backend/main.py",
+    "cd frontend && npm run dev"
+  ]
+}
