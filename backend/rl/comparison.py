@@ -4,6 +4,7 @@ from rl.q_learning_agent import CrowdSafetyQLearning
 from typing import Dict, List
 import json
 
+
 class SimulationComparison:
     """Compare baseline vs RL-optimized simulations"""
     
@@ -45,7 +46,7 @@ class SimulationComparison:
         }
     
     def run_optimized(self, num_agents: int, spawn_config: List[Dict], 
-                    max_steps: int = 200) -> Dict:
+                      max_steps: int = 200) -> Dict:
         """Run simulation WITH RL optimization"""
         if not self.rl_agent:
             raise ValueError("RL agent not provided")
@@ -61,18 +62,9 @@ class SimulationComparison:
             
             # Apply RL actions
             for node_id, node_data in current_state["nodes"].items():
-                if node_data["density"] > 3.5:  # ✅ Already fixed
+                if node_data["density"] > 1.5:
                     state_hash = self.rl_agent.discretize_state(node_data)
                     action = self.rl_agent.choose_action(state_hash, training=False)
-                    
-                    # 🆕 FILTER: Only use safe actions for comparison
-                    safe_actions = ["no_action", "reduce_inflow_25", "reroute_to_alt_exit"]
-                    if action not in safe_actions:
-                        # Replace aggressive actions with gentle rerouting
-                        if node_data["density"] > 4.5:
-                            action = "reduce_inflow_25"  # High density: slow inflow
-                        else:
-                            action = "reroute_to_alt_exit"  # Moderate: redistribute
                     
                     if action != "no_action":
                         # Apply action
@@ -109,7 +101,7 @@ class SimulationComparison:
             "danger_violations": final_state["stats"]["danger_violations"],
             "agents_reached_goal": final_state["stats"]["agents_reached_goal"]
         }
-
+    
     def _apply_action(self, sim: Simulator, node_id: str, action: str):
         """Apply RL action (same as trainer)"""
         if action == "no_action":
@@ -139,12 +131,12 @@ class SimulationComparison:
         elif action == "reroute_to_alt_exit":
             for agent in sim.agents.values():
                 if node_id in (agent.path or []):
-                    exit_nodes = [n for n, data in sim.twin.node_data.items() 
+                    exit_nodes = [n for n, data in sim.digital_twin.node_data.items() 
                                  if data["type"] == "exit" and n != agent.goal_node]
                     if exit_nodes:
                         alt_exit = min(exit_nodes, 
-                                      key=lambda n: sim.twin.node_data[n]["density"])
-                        alt_path = sim.twin.get_shortest_path(agent.current_node, alt_exit)
+                                      key=lambda n: sim.digital_twin.node_data[n]["density"])
+                        alt_path = sim.digital_twin.get_shortest_path(agent.current_node, alt_exit)
                         if alt_path:
                             agent.set_path(alt_path)
                             agent.goal_node = alt_exit

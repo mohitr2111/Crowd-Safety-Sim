@@ -129,12 +129,9 @@ class CrowdSafetyQLearning:
     
     def calculate_reward(self, sim_state: Dict) -> float:
         """
-        Improved reward function - COMPATIBLE with trainer.py
-        
-        Trainer calls: reward = self.agent.calculate_reward(sim.get_simulation_state())
-        So we only get sim_state, not prev_state/action/new_state
+        Reward function - BALANCED VERSION
+        Goal: Keep density below 4.0 p/m²
         """
-        # Extract metrics from simulation state
         max_density = sim_state["stats"]["max_density_reached"]
         danger_count = len(sim_state["danger_zones"])
         agents_reached = sim_state["stats"]["agents_reached_goal"]
@@ -142,47 +139,44 @@ class CrowdSafetyQLearning:
         
         reward = 0.0
         
-        # 1. SHARPER density penalties (quadratic!)
+        # Balanced density penalties
         if max_density > 6.0:
-            reward -= 150  # Was -120, now even stronger
+            reward -= 120  # CRITICAL
         elif max_density > 5.0:
-            reward -= 80   # Was -60
+            reward -= 60   # SEVERE
         elif max_density > 4.5:
-            reward -= 40   # Was -30
+            reward -= 30   # HIGH DANGER
         elif max_density > 4.0:
-            reward -= 20   # Was -15
+            reward -= 15   # DANGER
         elif max_density > 3.5:
-            reward += 10   # Still warning but acceptable
+            reward += 10   # WARNING but acceptable
         elif max_density > 3.0:
-            reward += 40   # Was +35, now higher reward
+            reward += 35   # GOOD
         elif max_density > 2.0:
-            reward += 65   # Was +55
+            reward += 55   # EXCELLENT
         else:
-            reward += 90   # Was +75, reward perfect density more
+            reward += 75   # PERFECT
         
-        # 2. MUCH STRONGER violation penalty
-        reward -= danger_count * 50  # Was 25, now DOUBLED
+        # Penalty for danger zones
+        reward -= danger_count * 25
         
-        # 3. Throughput reward (only if safe)
+        # Throughput reward
         if total_agents > 0:
             throughput_rate = agents_reached / total_agents
-            if max_density < 3.5:  # Only reward throughput if safe
-                reward += throughput_rate * 30  # Was 25
-            else:
-                reward += throughput_rate * 5  # Minimal reward if unsafe
+            reward += throughput_rate * 25
         
-        # 4. BIG BONUS for keeping density below danger threshold
+        # BONUS for keeping density below 4.0
         if max_density < 4.0:
-            reward += 50  # Was 40, now bigger bonus
+            reward += 40
         
-        # 5. BONUS for zero danger zones
+        # BONUS for NO danger zones
         if danger_count == 0:
-            reward += 45  # Was 35, now bigger bonus
+            reward += 35
         
-        # 6. Penalize stagnation (agents not moving)
+        # Penalty for stagnation
         active_agents = total_agents - agents_reached
         if active_agents > total_agents * 0.7 and sim_state["time"] > 30:
-            reward -= 20  # Was -15, now stronger
+            reward -= 15
         
         return reward
 

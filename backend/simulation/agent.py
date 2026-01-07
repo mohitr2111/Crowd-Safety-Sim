@@ -75,19 +75,15 @@ class Agent:
     
     def should_wait(self, current_density: float) -> bool:
         """
-        Decide whether to wait based on crowd density
-        Fixed thresholds to prevent deadlock
+        Decide whether to wait based on crowd density and patience
+        Higher patience = more willing to wait in crowds
         """
-        # Different wait thresholds by agent type
-        if self.agent_type == "rushing":
-            return current_density > 7.0  # Rushing people tolerate high density
-        elif self.agent_type == "elderly":
-            return current_density > 4.5  # Elderly wait sooner
-        elif self.agent_type == "family":
-            return current_density > 5.0  # Families wait at moderate density
-        else:
-            return current_density > 6.0  # Normal agents wait at high density
-
+        if current_density < self.preferred_personal_space:
+            return False  # Not crowded, keep moving
+            
+        # Probability of waiting increases with density and patience
+        wait_probability = (current_density / self.panic_threshold) * (1 - self.patience)
+        return random.random() < wait_probability
     
     def needs_rerouting(self, current_density: float) -> bool:
         """Check if agent should seek alternative route due to crowding"""

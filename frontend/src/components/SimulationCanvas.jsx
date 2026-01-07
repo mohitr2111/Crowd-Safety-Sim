@@ -1,304 +1,236 @@
-// frontend/src/components/SimulationCanvas.jsx
+import React, { useEffect, useRef } from 'react';
 
-import React, { useEffect, useRef, useState } from 'react'; // ✅ ADD useState
-
-const SimulationCanvas = ({ graphData, state, width = 800, height = 600 }) => {
+const SimulationCanvas = ({ graphData, state }) => {
   const canvasRef = useRef(null);
-  const [simulation, setSimulation] = useState(null);
 
-  // Helper function to get gradient color based on density
-  const getDensityColor = (density, maxDensity = 6.0) => {
-    const normalized = Math.min(density / maxDensity, 1);
-    
+  // Helper function to get color based on density
+  const getDensityColor = (density) => {
     if (density < 2.0) {
-      // SAFE - Green gradient
-      return `rgba(74, 200, 80, 0.9)`;
+      return '#4ade80'; // Green for safe
     } else if (density < 4.0) {
-      // WARNING - Yellow to Orange gradient
-      const t = (density - 2.0) / 2.0;
-      const r = Math.floor(251 + (239 - 251) * t);
-      const g = Math.floor(191 - (68 - 191) * t);
-      const b = 36;
-      return `rgba(${r}, ${g}, ${b}, 0.9)`;
+      return '#fbbf24'; // Yellow/Amber for warning
     } else {
-      // DANGER - Red gradient
-      const intensity = Math.min((density - 4.0) / 2.0, 1);
-      const r = 239;
-      const g = Math.floor(68 * (1 - intensity * 0.5));
-      const b = Math.floor(68 * (1 - intensity * 0.5));
-      return `rgba(${r}, ${g}, ${b}, 0.9)`;
+      return '#ef4444'; // Red for danger
     }
   };
 
-  // Helper function to get node radius based on capacity
-  const getNodeRadius = (nodeType, capacity) => {
-    if (nodeType === 'zone') return 40;
-    if (nodeType === 'exit') return 25;
-    return 30;
-  };
-
-  // Helper function to draw legend
-  const drawLegend = (ctx, canvasWidth, canvasHeight) => {
-    const legendX = canvasWidth - 150;
-    const legendY = 20;
-    const boxSize = 20;
-    const padding = 10;
-
-    // Legend background
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.strokeStyle = '#d1d5db';
-    ctx.lineWidth = 2;
-    ctx.fillRect(legendX - padding, legendY - padding, 140, 140);
-    ctx.strokeRect(legendX - padding, legendY - padding, 140, 140);
-
-    // Title
-    ctx.font = 'bold 12px Arial';
-    ctx.fillStyle = '#1f2937';
-    ctx.textAlign = 'left';
-    ctx.fillText('Density Levels', legendX, legendY + 10);
-
-    // Legend items
-    const items = [
-      { label: '< 2.0 p/m² (Safe)', color: getDensityColor(1.0) },
-      { label: '2-4 p/m² (Warning)', color: getDensityColor(3.0) },
-      { label: '> 4.0 p/m² (Danger)', color: getDensityColor(5.0) }
-    ];
-
-    items.forEach((item, index) => {
-      const y = legendY + 30 + index * 30;
-      
-      // Color box
-      ctx.fillStyle = item.color;
-      ctx.fillRect(legendX, y, boxSize, boxSize);
-      ctx.strokeStyle = '#374151';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(legendX, y, boxSize, boxSize);
-      
-      // Label
-      ctx.font = '11px Arial';
-      ctx.fillStyle = '#374151';
-      ctx.fillText(item.label, legendX + boxSize + 8, y + 15);
-    });
-  };
-
   useEffect(() => {
-    if (!graphData || !canvasRef.current) return;
+    if (!graphData || !state) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    // Set canvas size
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Clear canvas with light background
-    ctx.fillStyle = '#f9fafb';
+    // White background like the image
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // ✅ UPDATED: Layout nodes in a circle pattern if no x,y coordinates
-    const nodes = graphData.nodes.map((node, idx) => {
-      if (node.x && node.y) {
-        return node; // Use existing coordinates
-      }
-      
-      // Auto-layout in circle
-      const angle = (idx / graphData.nodes.length) * 2 * Math.PI;
-      const radius = Math.min(width, height) * 0.3;
-      return {
-        ...node,
-        x: width / 2 + Math.cos(angle) * radius,
-        y: height / 2 + Math.sin(angle) * radius
-      };
-    });
+    // Draw faint grey grid lines (like the image)
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    const gridSize = 20;
+    for (let x = 0; x < canvas.width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
 
-    // Draw edges (paths)
+    // Scale for visualization
+    const scaleX = canvas.width / 100;
+    const scaleY = canvas.height / 100;
+
+    // Draw edges (pathways) in light grey
     graphData.edges.forEach(edge => {
-      const fromNode = nodes.find(n => n.id === edge.from || n.id === edge.source);
-      const toNode = nodes.find(n => n.id === edge.to || n.id === edge.target);
+      const fromNode = graphData.nodes.find(n => n.id === edge.from);
+      const toNode = graphData.nodes.find(n => n.id === edge.to);
       
       if (fromNode && toNode) {
         ctx.strokeStyle = '#d1d5db';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(fromNode.x, fromNode.y);
-        ctx.lineTo(toNode.x, toNode.y);
+        ctx.moveTo(fromNode.x * scaleX, fromNode.y * scaleY);
+        ctx.lineTo(toNode.x * scaleX, toNode.y * scaleY);
         ctx.stroke();
       }
     });
 
-    // Draw nodes with gradient heatmap
-    nodes.forEach(node => {
-      const x = node.x;
-      const y = node.y;
-      const radius = getNodeRadius(node.type, node.capacity);
-
-      // ✅ UPDATED: Support both state formats
-      let agentCount = 0;
-      let density = 0;
-
-      if (state && state.nodes) {
-        // Format 1: state.nodes[node.id]
-        const nodeState = state.nodes[node.id];
-        agentCount = nodeState?.current_count || 0;
-        density = node.area_m2 > 0 ? agentCount / node.area_m2 : 0;
-      } else if (node.agent_count !== undefined) {
-        // Format 2: node.agent_count and node.density
-        agentCount = node.agent_count || 0;
-        density = node.density || 0;
-      }
+    // Draw zones as rectangular areas (like floor plan)
+    graphData.nodes.forEach(node => {
+      const nodeState = state.nodes[node.id];
+      const x = node.x * scaleX;
+      const y = node.y * scaleY;
       
-      // Get gradient color based on density
-      const fillColor = getDensityColor(density);
+      // Calculate density
+      const density = node.area_m2 > 0 
+        ? nodeState.current_count / node.area_m2 
+        : 0;
+      
+      // Zone size based on area (rectangular)
+      const zoneWidth = Math.sqrt(node.area_m2) * 3;
+      const zoneHeight = Math.sqrt(node.area_m2) * 2.5;
+      
+      // Draw zone background - light grey for pathways, pale yellow for important areas
+      const isImportant = node.type === 'entrance' || node.type === 'exit' || node.id.toLowerCase().includes('sanctum') || node.id.toLowerCase().includes('hall');
+      ctx.fillStyle = isImportant ? '#fef3c7' : '#f3f4f6'; // Pale yellow for important, light grey for others
+      ctx.fillRect(x - zoneWidth/2, y - zoneHeight/2, zoneWidth, zoneHeight);
+      
+      // Draw zone border
+      ctx.strokeStyle = density > 4.0 ? '#ef4444' : '#9ca3af';
+      ctx.lineWidth = density > 4.0 ? 3 : 1;
+      ctx.strokeRect(x - zoneWidth/2, y - zoneHeight/2, zoneWidth, zoneHeight);
 
-      // Draw outer glow for danger zones
-      if (density > 4.0) {
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = 'rgba(239, 68, 68, 0.6)';
-      } else {
-        ctx.shadowBlur = 0;
-      }
-
-      // Draw node circle with gradient
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      const fillColorSolid = fillColor.replace('0.9', '1.0');
-      const fillColorTrans = fillColor.replace('0.9', '0.5');
-
-      gradient.addColorStop(0, fillColorSolid);
-      gradient.addColorStop(1, fillColorTrans);
-
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.fill();
-
-      // Reset shadow
-      ctx.shadowBlur = 0;
-
-      // Draw border based on node type
-      if (node.type === 'exit') {
-        ctx.strokeStyle = '#16a34a';
-        ctx.lineWidth = 3;
-      } else if (node.type === 'entry') {
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 3;
-      } else if (node.type === 'zone') {
-        ctx.strokeStyle = '#6366f1';
-        ctx.lineWidth = 2;
-      } else {
-        ctx.strokeStyle = '#374151';
-        ctx.lineWidth = 2;
-      }
-      ctx.stroke();
-
-      // Draw node label with background
-      ctx.font = 'bold 11px Arial';
+      // Draw zone label (like "ENTRANCE", "INNER HALL", "SANCTUM")
+      ctx.font = 'bold 12px Arial';
+      ctx.fillStyle = '#1f2937';
       ctx.textAlign = 'center';
-      const label = (node.label || node.name || node.id).replace(/_/g, ' ').substring(0, 10);
-      const labelWidth = ctx.measureText(label).width;
+      const label = node.id.replace(/_/g, ' ').toUpperCase().substring(0, 15);
       
-      // Label background
+      // Label background for readability
+      const labelWidth = ctx.measureText(label).width;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.fillRect(x - labelWidth/2 - 4, y - radius - 20, labelWidth + 8, 16);
+      ctx.fillRect(x - labelWidth/2 - 4, y - zoneHeight/2 - 18, labelWidth + 8, 16);
       
       // Label text
       ctx.fillStyle = '#1f2937';
-      ctx.fillText(label, x, y - radius - 8);
-
-      // Draw occupancy count with background
-      ctx.font = 'bold 14px Arial';
-      const countText = agentCount.toString();
-      
-      // Count background circle
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.beginPath();
-      ctx.arc(x, y, 12, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Count text
-      ctx.fillStyle = density > 4.0 ? '#dc2626' : '#1f2937';
-      ctx.fillText(countText, x, y + 5);
-
-      // Draw density indicator below node
-      ctx.font = '9px Arial';
-      ctx.fillStyle = '#6b7280';
-      ctx.fillText(`${density.toFixed(1)} p/m²`, x, y + radius + 15);
-
-      // Draw danger icon for high density
-      if (density > 4.0) {
-        ctx.font = 'bold 20px Arial';
-        ctx.fillText('⚠️', x + radius - 10, y - radius + 10);
-      }
+      ctx.fillText(label, x, y - zoneHeight/2 - 6);
     });
 
-    // ✅ UPDATED: Draw agents (support both formats)
-    const agents = state?.agents || {};
-    const agentEntries = Array.isArray(agents) 
-      ? agents.map((a, i) => [i, a]) 
-      : Object.entries(agents);
+    // Draw agents as rectangles (not circles) - distributed in grid within zones
+    const agentsByNode = {};
+    Object.entries(state.agents).forEach(([agentId, agent]) => {
+      if (!agentsByNode[agent.current_node]) {
+        agentsByNode[agent.current_node] = [];
+      }
+      agentsByNode[agent.current_node].push(agent);
+    });
 
-    agentEntries.forEach(([agentId, agent]) => {
-      const nodeId = agent.current_node || agent.position;
-      const node = nodes.find(n => n.id === nodeId);
+    Object.entries(agentsByNode).forEach(([nodeId, agents]) => {
+      const node = graphData.nodes.find(n => n.id === nodeId);
       if (!node) return;
 
-      // Random offset for visual variety
-      const offsetX = (Math.random() - 0.5) * 20;
-      const offsetY = (Math.random() - 0.5) * 20;
-      const x = node.x + offsetX;
-      const y = node.y + offsetY;
+      const nodeState = state.nodes[nodeId];
+      const density = node.area_m2 > 0 
+        ? nodeState.current_count / node.area_m2 
+        : 0;
 
-      // Agent color by type
-      const agentColors = {
-        normal: '#3b82f6',
-        family: '#8b5cf6',
-        elderly: '#f59e0b',
-        rushing: '#ef4444'
-      };
+      const nodeX = node.x * scaleX;
+      const nodeY = node.y * scaleY;
+      const zoneWidth = Math.sqrt(node.area_m2) * 3;
+      const zoneHeight = Math.sqrt(node.area_m2) * 2.5;
+      
+      // Calculate grid layout for agents
+      const agentsInNode = agents.length;
+      const gridCols = Math.ceil(Math.sqrt(agentsInNode));
+      const gridRows = Math.ceil(agentsInNode / gridCols);
+      
+      const spacingX = zoneWidth / (gridCols + 1);
+      const spacingY = zoneHeight / (gridRows + 1);
+      
+      agents.forEach((agent, index) => {
+        const col = index % gridCols;
+        const row = Math.floor(index / gridCols);
+        
+        const offsetX = (col + 1) * spacingX - zoneWidth/2;
+        const offsetY = (row + 1) * spacingY - zoneHeight/2;
+        
+        const agentX = nodeX + offsetX;
+        const agentY = nodeY + offsetY;
 
-      const color = agentColors[agent.type] || '#3b82f6';
+        // Agent color - green rectangles like in the image
+        const agentColor = '#22c55e'; // Green like the image
 
-      // Draw agent with shadow
-      ctx.shadowBlur = 3;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, 2 * Math.PI);
-      ctx.fill();
-
-      // Draw white outline
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+        // Draw rectangular agent (not circle)
+        const rectSize = 5;
+        ctx.fillStyle = agentColor;
+        ctx.fillRect(agentX - rectSize/2, agentY - rectSize/2, rectSize, rectSize);
+        
+        // Draw border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(agentX - rectSize/2, agentY - rectSize/2, rectSize, rectSize);
+      });
     });
 
-    // Draw legend
-    drawLegend(ctx, canvas.width, canvas.height);
+    // Draw green rectangles with numbers (like in the image) for each zone
+    graphData.nodes.forEach(node => {
+      const nodeState = state.nodes[node.id];
+      const x = node.x * scaleX;
+      const y = node.y * scaleY;
+      const zoneWidth = Math.sqrt(node.area_m2) * 3;
+      const zoneHeight = Math.sqrt(node.area_m2) * 2.5;
+      
+      // Position count indicator (green rectangle with number)
+      const countX = x + zoneWidth/2 - 30;
+      const countY = y - zoneHeight/2 + 10;
+      
+      // Draw green rectangle background
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(countX, countY, 40, 25);
+      
+      // Draw border
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(countX, countY, 40, 25);
+      
+      // Draw count number in white
+      ctx.font = 'bold 14px Arial';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(nodeState.current_count.toString(), countX + 20, countY + 18);
+    });
 
-  }, [graphData, state, width, height]);
+  }, [graphData, state]);
 
   return (
     <div className="relative">
       <canvas
         ref={canvasRef}
-        className="border-2 border-gray-300 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg"
+        width={800}
+        height={600}
+        style={{
+          border: '2px solid #e5e7eb',
+          borderRadius: '8px',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
       />
       
       {/* Overlay stats */}
-      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border-2 border-gray-200">
-        <div className="text-xs font-semibold text-gray-700 mb-1">Live Statistics</div>
-        <div className="text-sm">
-          <span className="font-bold text-blue-600">
-            {state?.agents ? (Array.isArray(state.agents) ? state.agents.length : Object.keys(state.agents).length) : 0}
-          </span>
-          <span className="text-gray-600"> active agents</span>
+      {state && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '16px',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '12px',
+          borderRadius: '8px',
+          border: '1px solid #e5e7eb',
+          color: '#1f2937',
+          fontSize: '12px',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Live Statistics</div>
+          <div>
+            <span style={{ fontWeight: 'bold', color: '#3b82f6' }}>
+              {Object.keys(state?.agents || {}).length}
+            </span>
+            <span style={{ color: '#6b7280' }}> active agents</span>
+          </div>
+          <div>
+            <span style={{ fontWeight: 'bold', color: '#22c55e' }}>
+              {state?.reached_goal || 0}
+            </span>
+            <span style={{ color: '#6b7280' }}> reached goal</span>
+          </div>
         </div>
-        <div className="text-sm">
-          <span className="font-bold text-green-600">{state?.reached_goal || 0}</span>
-          <span className="text-gray-600"> reached goal</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
