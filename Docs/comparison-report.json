@@ -1,0 +1,781 @@
+{
+  "scenario": "stadium_exit",
+  "total_agents": 1100,
+  "baseline": {
+    "max_density": 5,
+    "danger_violations": 7,
+    "evacuation_time": 59,
+    "agents_reached": 1100
+  },
+  "optimized": {
+    "max_density": 4.575,
+    "danger_violations": 5,
+    "evacuation_time": 55,
+    "agents_reached": 1100
+  },
+  "improvements": {
+    "density_reduction_percent": 8.499999999999996,
+    "danger_violations_prevented": 2,
+    "time_difference": -4
+  },
+  "sample_actions": [
+    {
+      "time": 2,
+      "node": "corridor_north",
+      "density": 3.125,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 110.00)"
+    },
+    {
+      "time": 3,
+      "node": "corridor_north",
+      "density": 3.7,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 3,
+      "node": "corridor_south",
+      "density": 3.35,
+      "action": "reroute_to_alt_exit",
+      "explanation": "Optimizing flow. Redirecting crowd to less congested exits. (Confidence: 110.00)"
+    },
+    {
+      "time": 4,
+      "node": "corridor_north",
+      "density": 3.95,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 4,
+      "node": "corridor_south",
+      "density": 3.65,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 5,
+      "node": "corridor_north",
+      "density": 4.325,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 5,
+      "node": "corridor_south",
+      "density": 4.075,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 6,
+      "node": "corridor_north",
+      "density": 4.575,
+      "action": "reduce_inflow_50",
+      "explanation": "High density approaching. Cutting inflow by 50%. (Confidence: -66.11)"
+    },
+    {
+      "time": 6,
+      "node": "corridor_south",
+      "density": 4.075,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    },
+    {
+      "time": 7,
+      "node": "corridor_north",
+      "density": 4.45,
+      "action": "reduce_inflow_25",
+      "explanation": "Moderate crowding detected. Slowing 25% of incoming traffic. (Confidence: 86.90)"
+    }
+  ],
+  "baseline_history": [
+    {
+      "time": 1,
+      "max_density": 0.8333333333333334,
+      "active_agents": 1100,
+      "danger_zones": 0
+    },
+    {
+      "time": 2,
+      "max_density": 4,
+      "active_agents": 1100,
+      "danger_zones": 1
+    },
+    {
+      "time": 3,
+      "max_density": 4.625,
+      "active_agents": 1080,
+      "danger_zones": 1
+    },
+    {
+      "time": 4,
+      "max_density": 4.9,
+      "active_agents": 1038,
+      "danger_zones": 1
+    },
+    {
+      "time": 5,
+      "max_density": 5,
+      "active_agents": 999,
+      "danger_zones": 1
+    },
+    {
+      "time": 6,
+      "max_density": 5,
+      "active_agents": 957,
+      "danger_zones": 1
+    },
+    {
+      "time": 7,
+      "max_density": 5,
+      "active_agents": 900,
+      "danger_zones": 2
+    },
+    {
+      "time": 8,
+      "max_density": 5,
+      "active_agents": 848,
+      "danger_zones": 0
+    },
+    {
+      "time": 9,
+      "max_density": 5,
+      "active_agents": 788,
+      "danger_zones": 0
+    },
+    {
+      "time": 10,
+      "max_density": 5,
+      "active_agents": 737,
+      "danger_zones": 1
+    },
+    {
+      "time": 11,
+      "max_density": 5,
+      "active_agents": 695,
+      "danger_zones": 0
+    },
+    {
+      "time": 12,
+      "max_density": 5,
+      "active_agents": 641,
+      "danger_zones": 0
+    },
+    {
+      "time": 13,
+      "max_density": 5,
+      "active_agents": 593,
+      "danger_zones": 0
+    },
+    {
+      "time": 14,
+      "max_density": 5,
+      "active_agents": 543,
+      "danger_zones": 0
+    },
+    {
+      "time": 15,
+      "max_density": 5,
+      "active_agents": 483,
+      "danger_zones": 0
+    },
+    {
+      "time": 16,
+      "max_density": 5,
+      "active_agents": 449,
+      "danger_zones": 0
+    },
+    {
+      "time": 17,
+      "max_density": 5,
+      "active_agents": 394,
+      "danger_zones": 0
+    },
+    {
+      "time": 18,
+      "max_density": 5,
+      "active_agents": 348,
+      "danger_zones": 0
+    },
+    {
+      "time": 19,
+      "max_density": 5,
+      "active_agents": 312,
+      "danger_zones": 0
+    },
+    {
+      "time": 20,
+      "max_density": 5,
+      "active_agents": 273,
+      "danger_zones": 0
+    },
+    {
+      "time": 21,
+      "max_density": 5,
+      "active_agents": 238,
+      "danger_zones": 0
+    },
+    {
+      "time": 22,
+      "max_density": 5,
+      "active_agents": 208,
+      "danger_zones": 0
+    },
+    {
+      "time": 23,
+      "max_density": 5,
+      "active_agents": 185,
+      "danger_zones": 0
+    },
+    {
+      "time": 24,
+      "max_density": 5,
+      "active_agents": 172,
+      "danger_zones": 0
+    },
+    {
+      "time": 25,
+      "max_density": 5,
+      "active_agents": 153,
+      "danger_zones": 0
+    },
+    {
+      "time": 26,
+      "max_density": 5,
+      "active_agents": 132,
+      "danger_zones": 0
+    },
+    {
+      "time": 27,
+      "max_density": 5,
+      "active_agents": 113,
+      "danger_zones": 0
+    },
+    {
+      "time": 28,
+      "max_density": 5,
+      "active_agents": 98,
+      "danger_zones": 0
+    },
+    {
+      "time": 29,
+      "max_density": 5,
+      "active_agents": 88,
+      "danger_zones": 0
+    },
+    {
+      "time": 30,
+      "max_density": 5,
+      "active_agents": 79,
+      "danger_zones": 0
+    },
+    {
+      "time": 31,
+      "max_density": 5,
+      "active_agents": 62,
+      "danger_zones": 0
+    },
+    {
+      "time": 32,
+      "max_density": 5,
+      "active_agents": 51,
+      "danger_zones": 0
+    },
+    {
+      "time": 33,
+      "max_density": 5,
+      "active_agents": 43,
+      "danger_zones": 0
+    },
+    {
+      "time": 34,
+      "max_density": 5,
+      "active_agents": 38,
+      "danger_zones": 0
+    },
+    {
+      "time": 35,
+      "max_density": 5,
+      "active_agents": 35,
+      "danger_zones": 0
+    },
+    {
+      "time": 36,
+      "max_density": 5,
+      "active_agents": 30,
+      "danger_zones": 0
+    },
+    {
+      "time": 37,
+      "max_density": 5,
+      "active_agents": 26,
+      "danger_zones": 0
+    },
+    {
+      "time": 38,
+      "max_density": 5,
+      "active_agents": 23,
+      "danger_zones": 0
+    },
+    {
+      "time": 39,
+      "max_density": 5,
+      "active_agents": 19,
+      "danger_zones": 0
+    },
+    {
+      "time": 40,
+      "max_density": 5,
+      "active_agents": 13,
+      "danger_zones": 0
+    },
+    {
+      "time": 41,
+      "max_density": 5,
+      "active_agents": 11,
+      "danger_zones": 0
+    },
+    {
+      "time": 42,
+      "max_density": 5,
+      "active_agents": 9,
+      "danger_zones": 0
+    },
+    {
+      "time": 43,
+      "max_density": 5,
+      "active_agents": 8,
+      "danger_zones": 0
+    },
+    {
+      "time": 44,
+      "max_density": 5,
+      "active_agents": 7,
+      "danger_zones": 0
+    },
+    {
+      "time": 45,
+      "max_density": 5,
+      "active_agents": 5,
+      "danger_zones": 0
+    },
+    {
+      "time": 46,
+      "max_density": 5,
+      "active_agents": 4,
+      "danger_zones": 0
+    },
+    {
+      "time": 47,
+      "max_density": 5,
+      "active_agents": 4,
+      "danger_zones": 0
+    },
+    {
+      "time": 48,
+      "max_density": 5,
+      "active_agents": 3,
+      "danger_zones": 0
+    },
+    {
+      "time": 49,
+      "max_density": 5,
+      "active_agents": 3,
+      "danger_zones": 0
+    },
+    {
+      "time": 50,
+      "max_density": 5,
+      "active_agents": 2,
+      "danger_zones": 0
+    },
+    {
+      "time": 51,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 52,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 53,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 54,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 55,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 56,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 57,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 58,
+      "max_density": 5,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 59,
+      "max_density": 5,
+      "active_agents": 0,
+      "danger_zones": 0
+    }
+  ],
+  "optimized_history": [
+    {
+      "time": 1,
+      "max_density": 0.8333333333333334,
+      "active_agents": 1100,
+      "danger_zones": 0
+    },
+    {
+      "time": 2,
+      "max_density": 3.125,
+      "active_agents": 1100,
+      "danger_zones": 0
+    },
+    {
+      "time": 3,
+      "max_density": 3.7,
+      "active_agents": 1078,
+      "danger_zones": 0
+    },
+    {
+      "time": 4,
+      "max_density": 3.95,
+      "active_agents": 1057,
+      "danger_zones": 0
+    },
+    {
+      "time": 5,
+      "max_density": 4.325,
+      "active_agents": 1012,
+      "danger_zones": 2
+    },
+    {
+      "time": 6,
+      "max_density": 4.575,
+      "active_agents": 964,
+      "danger_zones": 2
+    },
+    {
+      "time": 7,
+      "max_density": 4.575,
+      "active_agents": 921,
+      "danger_zones": 2
+    },
+    {
+      "time": 8,
+      "max_density": 4.575,
+      "active_agents": 875,
+      "danger_zones": 2
+    },
+    {
+      "time": 9,
+      "max_density": 4.575,
+      "active_agents": 823,
+      "danger_zones": 1
+    },
+    {
+      "time": 10,
+      "max_density": 4.575,
+      "active_agents": 775,
+      "danger_zones": 0
+    },
+    {
+      "time": 11,
+      "max_density": 4.575,
+      "active_agents": 718,
+      "danger_zones": 0
+    },
+    {
+      "time": 12,
+      "max_density": 4.575,
+      "active_agents": 663,
+      "danger_zones": 0
+    },
+    {
+      "time": 13,
+      "max_density": 4.575,
+      "active_agents": 614,
+      "danger_zones": 0
+    },
+    {
+      "time": 14,
+      "max_density": 4.575,
+      "active_agents": 559,
+      "danger_zones": 0
+    },
+    {
+      "time": 15,
+      "max_density": 4.575,
+      "active_agents": 512,
+      "danger_zones": 0
+    },
+    {
+      "time": 16,
+      "max_density": 4.575,
+      "active_agents": 480,
+      "danger_zones": 0
+    },
+    {
+      "time": 17,
+      "max_density": 4.575,
+      "active_agents": 443,
+      "danger_zones": 0
+    },
+    {
+      "time": 18,
+      "max_density": 4.575,
+      "active_agents": 399,
+      "danger_zones": 0
+    },
+    {
+      "time": 19,
+      "max_density": 4.575,
+      "active_agents": 356,
+      "danger_zones": 0
+    },
+    {
+      "time": 20,
+      "max_density": 4.575,
+      "active_agents": 319,
+      "danger_zones": 0
+    },
+    {
+      "time": 21,
+      "max_density": 4.575,
+      "active_agents": 284,
+      "danger_zones": 0
+    },
+    {
+      "time": 22,
+      "max_density": 4.575,
+      "active_agents": 260,
+      "danger_zones": 0
+    },
+    {
+      "time": 23,
+      "max_density": 4.575,
+      "active_agents": 235,
+      "danger_zones": 0
+    },
+    {
+      "time": 24,
+      "max_density": 4.575,
+      "active_agents": 208,
+      "danger_zones": 0
+    },
+    {
+      "time": 25,
+      "max_density": 4.575,
+      "active_agents": 178,
+      "danger_zones": 0
+    },
+    {
+      "time": 26,
+      "max_density": 4.575,
+      "active_agents": 148,
+      "danger_zones": 0
+    },
+    {
+      "time": 27,
+      "max_density": 4.575,
+      "active_agents": 121,
+      "danger_zones": 0
+    },
+    {
+      "time": 28,
+      "max_density": 4.575,
+      "active_agents": 108,
+      "danger_zones": 0
+    },
+    {
+      "time": 29,
+      "max_density": 4.575,
+      "active_agents": 94,
+      "danger_zones": 0
+    },
+    {
+      "time": 30,
+      "max_density": 4.575,
+      "active_agents": 81,
+      "danger_zones": 0
+    },
+    {
+      "time": 31,
+      "max_density": 4.575,
+      "active_agents": 70,
+      "danger_zones": 0
+    },
+    {
+      "time": 32,
+      "max_density": 4.575,
+      "active_agents": 61,
+      "danger_zones": 0
+    },
+    {
+      "time": 33,
+      "max_density": 4.575,
+      "active_agents": 59,
+      "danger_zones": 0
+    },
+    {
+      "time": 34,
+      "max_density": 4.575,
+      "active_agents": 56,
+      "danger_zones": 0
+    },
+    {
+      "time": 35,
+      "max_density": 4.575,
+      "active_agents": 47,
+      "danger_zones": 0
+    },
+    {
+      "time": 36,
+      "max_density": 4.575,
+      "active_agents": 43,
+      "danger_zones": 0
+    },
+    {
+      "time": 37,
+      "max_density": 4.575,
+      "active_agents": 31,
+      "danger_zones": 0
+    },
+    {
+      "time": 38,
+      "max_density": 4.575,
+      "active_agents": 23,
+      "danger_zones": 0
+    },
+    {
+      "time": 39,
+      "max_density": 4.575,
+      "active_agents": 19,
+      "danger_zones": 0
+    },
+    {
+      "time": 40,
+      "max_density": 4.575,
+      "active_agents": 15,
+      "danger_zones": 0
+    },
+    {
+      "time": 41,
+      "max_density": 4.575,
+      "active_agents": 14,
+      "danger_zones": 0
+    },
+    {
+      "time": 42,
+      "max_density": 4.575,
+      "active_agents": 11,
+      "danger_zones": 0
+    },
+    {
+      "time": 43,
+      "max_density": 4.575,
+      "active_agents": 10,
+      "danger_zones": 0
+    },
+    {
+      "time": 44,
+      "max_density": 4.575,
+      "active_agents": 6,
+      "danger_zones": 0
+    },
+    {
+      "time": 45,
+      "max_density": 4.575,
+      "active_agents": 4,
+      "danger_zones": 0
+    },
+    {
+      "time": 46,
+      "max_density": 4.575,
+      "active_agents": 3,
+      "danger_zones": 0
+    },
+    {
+      "time": 47,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 48,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 49,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 50,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 51,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 52,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 53,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 54,
+      "max_density": 4.575,
+      "active_agents": 1,
+      "danger_zones": 0
+    },
+    {
+      "time": 55,
+      "max_density": 4.575,
+      "active_agents": 0,
+      "danger_zones": 0
+    }
+  ]
+}

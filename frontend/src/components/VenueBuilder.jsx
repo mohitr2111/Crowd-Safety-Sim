@@ -128,6 +128,7 @@ const VenueBuilder = ({ onSave }) => {
     setDragOffset({ x: 0, y: 0 });
   };
 
+<<<<<<< HEAD
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>🏗️ Venue Builder</h2>
@@ -136,10 +137,30 @@ const VenueBuilder = ({ onSave }) => {
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>1. Select Template</h3>
         <div style={styles.templateGrid}>
+=======
+  const getZoneColor = (type) => {
+    const colors = {
+      entrance: '#10b981',
+      zone: '#f59e0b',
+      corridor: '#3b82f6',
+      exit: '#ef4444'
+    };
+    return colors[type] || '#64748b';
+  };
+
+  return (
+    <div className="glass-card p-6 space-y-6">
+      <h2 className="text-xl font-bold text-slate-200">Venue Builder</h2>
+
+      <div>
+        <h3 className="text-sm font-bold text-slate-400 mb-3">1. Select Template</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+>>>>>>> nikhil
           {Object.entries(templates).map(([key, template]) => (
             <button
               key={key}
               onClick={() => loadTemplate(key)}
+<<<<<<< HEAD
               style={{
                 ...styles.templateButton,
                 backgroundColor: selectedTemplate === key ? '#3b82f6' : '#f3f4f6',
@@ -148,20 +169,38 @@ const VenueBuilder = ({ onSave }) => {
             >
               <div style={{ fontWeight: 'bold' }}>{template.name}</div>
               <div style={{ fontSize: '12px' }}>{template.description}</div>
+=======
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                selectedTemplate === key
+                  ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+                  : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'
+              }`}
+            >
+              <div className="font-bold">{template.name}</div>
+              <div className="text-xs opacity-75">{template.description}</div>
+>>>>>>> nikhil
             </button>
           ))}
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Canvas - Drag zones to position */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>2. Position Zones (Click and drag to move)</h3>
         <div
           style={styles.canvas}
+=======
+      <div>
+        <h3 className="text-sm font-bold text-slate-400 mb-3">2. Position Zones (Click and drag)</h3>
+        <div
+          className="relative w-full h-72 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden"
+>>>>>>> nikhil
           onMouseMove={handleZoneMouseMove}
           onMouseUp={handleZoneMouseUp}
           onMouseLeave={handleZoneMouseUp}
         >
+<<<<<<< HEAD
           {/* SVG Grid - More detailed grid like the image */}
           <svg style={styles.grid}>
             {Array.from({ length: 21 }, (_, i) => i * 5).map(i => (
@@ -191,10 +230,22 @@ const VenueBuilder = ({ onSave }) => {
           </svg>
 
           {/* Draggable Zones - Rectangular like the image */}
+=======
+          <svg className="absolute inset-0 w-full h-full">
+            {Array.from({ length: 11 }, (_, i) => i * 10).map(i => (
+              <line key={`v${i}`} x1={`${i}%`} y1="0" x2={`${i}%`} y2="100%" stroke="#334155" strokeWidth="0.5" />
+            ))}
+            {Array.from({ length: 11 }, (_, i) => i * 10).map(i => (
+              <line key={`h${i}`} x1="0" y1={`${i}%`} x2="100%" y2={`${i}%`} stroke="#334155" strokeWidth="0.5" />
+            ))}
+          </svg>
+
+>>>>>>> nikhil
           {scenario.zones.map(zone => (
             <div
               key={zone.id}
               onMouseDown={(e) => handleZoneMouseDown(zone.id, e)}
+<<<<<<< HEAD
               style={{
                 ...styles.zoneElement,
                 left: `${zone.x}%`,
@@ -229,29 +280,63 @@ const VenueBuilder = ({ onSave }) => {
               }}>
                 {zone.area}m²
               </div>
+=======
+              className="absolute flex flex-col items-center justify-center rounded-lg cursor-grab active:cursor-grabbing transition-shadow"
+              style={{
+                left: `${zone.x}%`,
+                top: `${zone.y}%`,
+                transform: 'translate(-50%, -50%)',
+                width: '100px',
+                height: '60px',
+                backgroundColor: getZoneColor(zone.type),
+                boxShadow: draggingZone === zone.id ? '0 0 20px rgba(59, 130, 246, 0.5)' : 'none',
+                zIndex: draggingZone === zone.id ? 10 : 1,
+                opacity: 0.9
+              }}
+            >
+              <div className="text-xs font-bold text-white text-center px-1">{zone.name}</div>
+              <div className="text-[10px] text-white/80">{zone.area}m²</div>
+>>>>>>> nikhil
             </div>
           ))}
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Add Zone */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>3. Add Custom Zone</h3>
         <div style={styles.formGroup}>
+=======
+      <div>
+        <h3 className="text-sm font-bold text-slate-400 mb-3">3. Add Custom Zone</h3>
+        <div className="flex gap-3">
+>>>>>>> nikhil
           <input
             type="text"
             placeholder="Zone name (e.g., 'Queue Area')"
             value={newZoneName}
             onChange={(e) => setNewZoneName(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addZone()}
+<<<<<<< HEAD
             style={styles.input}
           />
           <select value={newZoneType} onChange={(e) => setNewZoneType(e.target.value)} style={styles.select}>
+=======
+            className="input-modern flex-1"
+          />
+          <select 
+            value={newZoneType} 
+            onChange={(e) => setNewZoneType(e.target.value)} 
+            className="input-modern w-auto"
+          >
+>>>>>>> nikhil
             <option value="zone">Zone (Crowd Area)</option>
             <option value="entrance">Entrance</option>
             <option value="exit">Exit</option>
             <option value="corridor">Corridor</option>
           </select>
+<<<<<<< HEAD
           <button onClick={addZone} style={styles.button}>+ Add Zone</button>
         </div>
       </div>
@@ -267,17 +352,46 @@ const VenueBuilder = ({ onSave }) => {
                 <span style={styles.zoneType}>{zone.type}</span>
               </div>
               <div style={styles.zoneControls}>
+=======
+          <button onClick={addZone} className="btn-primary">Add Zone</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-bold text-slate-400 mb-3">4. Adjust Zone Properties</h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {scenario.zones.map(zone => (
+            <div key={zone.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: getZoneColor(zone.type) }}
+                ></div>
+                <strong className="text-slate-200">{zone.name}</strong>
+                <span className="text-xs text-slate-500 px-2 py-0.5 bg-slate-700 rounded">{zone.type}</span>
+              </div>
+              <div className="flex items-center gap-3">
+>>>>>>> nikhil
                 <input
                   type="number"
                   placeholder="Area m²"
                   value={zone.area}
                   onChange={(e) => updateZone(zone.id, { area: parseInt(e.target.value) })}
+<<<<<<< HEAD
                   style={styles.numberInput}
                 />
                 <span style={styles.capacity}>Cap: {Math.round(zone.area * 0.45)}</span>
                 <button
                   onClick={() => removeZone(zone.id)}
                   style={styles.deleteButton}
+=======
+                  className="input-modern w-20 text-sm py-1"
+                />
+                <span className="text-xs text-slate-500">Cap: {Math.round(zone.area * 0.45)}</span>
+                <button
+                  onClick={() => removeZone(zone.id)}
+                  className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30"
+>>>>>>> nikhil
                 >
                   ✕
                 </button>
@@ -287,18 +401,27 @@ const VenueBuilder = ({ onSave }) => {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Save */}
       <div style={styles.section}>
+=======
+      <div className="flex gap-3">
+>>>>>>> nikhil
         <input
           type="text"
           placeholder="Scenario name"
           value={scenario.name}
           onChange={(e) => setScenario({ ...scenario, name: e.target.value })}
+<<<<<<< HEAD
           style={styles.input}
+=======
+          className="input-modern flex-1"
+>>>>>>> nikhil
         />
         <button
           onClick={() => {
             onSave(scenario);
+<<<<<<< HEAD
             alert(`✅ Scenario "${scenario.name}" saved!`);
           }}
           style={styles.saveButton}
@@ -311,6 +434,19 @@ const VenueBuilder = ({ onSave }) => {
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Preview (JSON)</h3>
         <pre style={styles.preview}>
+=======
+            alert(`Scenario "${scenario.name}" saved!`);
+          }}
+          className="btn-primary"
+        >
+          Save Scenario
+        </button>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-bold text-slate-400 mb-3">Preview (JSON)</h3>
+        <pre className="bg-slate-900 p-4 rounded-lg overflow-auto text-xs text-emerald-400 max-h-48">
+>>>>>>> nikhil
           {JSON.stringify(scenario, null, 2)}
         </pre>
       </div>
@@ -318,6 +454,7 @@ const VenueBuilder = ({ onSave }) => {
   );
 };
 
+<<<<<<< HEAD
 const getZoneColor = (type) => {
   const colors = {
     entrance: '#86efac',    // Green
@@ -505,3 +642,6 @@ const styles = {
 };
 
 export default VenueBuilder;
+=======
+export default VenueBuilder;
+>>>>>>> nikhil
