@@ -30,12 +30,9 @@ class DigitalTwin:
             "current_count": 0,
             "position": position,
             "type": area_type,
-            "density": 0.0,
-            "risk_level": "SAFE",
-            "is_blocked": False,  # NEW: Track if node is temporarily closed
-            "block_expires": 0.0  # NEW: When block expires
+            "density": 0.0,  # people per m²
+            "risk_level": "SAFE"  # SAFE, WARNING, DANGER
         }
-
         
     def add_path(self, from_node: str, to_node: str, width_m: float, 
                  length_m: float, flow_capacity: int, bidirectional: bool = True):
@@ -105,31 +102,8 @@ class DigitalTwin:
         }
     
     def get_shortest_path(self, start: str, end: str) -> Optional[List[str]]:
-        """Find shortest path for agent navigation, avoiding blocked nodes"""
+        """Find shortest path for agent navigation"""
         try:
-            # Create a view of the graph excluding blocked nodes
-            blocked_nodes = [
-                node for node, data in self.node_data.items() 
-                if data.get("is_blocked", False)
-            ]
-            
-            # If no blocked nodes, use normal pathfinding
-            if not blocked_nodes:
-                return nx.shortest_path(self.graph, start, end)
-            
-            # Create subgraph excluding blocked nodes (except start/end)
-            # We must keep start/end even if blocked, so agent can escape
-            nodes_to_exclude = [n for n in blocked_nodes if n != start and n != end]
-            
-            if not nodes_to_exclude:
-                return nx.shortest_path(self.graph, start, end)
-            
-            # Create subgraph without blocked nodes
-            active_nodes = [n for n in self.graph.nodes() if n not in nodes_to_exclude]
-            subgraph = self.graph.subgraph(active_nodes)
-            
-            return nx.shortest_path(subgraph, start, end)
-            
+            return nx.shortest_path(self.graph, start, end)
         except nx.NetworkXNoPath:
-            # No path exists (all routes blocked) - return None
             return None

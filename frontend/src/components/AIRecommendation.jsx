@@ -1,153 +1,145 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const AIRecommendations = ({ stadiumStatus, simulationId }) => {
-  const [executingActions, setExecutingActions] = useState({});
-  const [executedActions, setExecutedActions] = useState({});
-
+const AIRecommendations = ({ stadiumStatus }) => {
   if (!stadiumStatus) return null;
 
-  const hasRecommendations = stadiumStatus.recommendations && 
-                              stadiumStatus.recommendations.length > 0;
-
-  const handleExecuteAction = async (rec, index) => {
-    if (!simulationId) return;
-    
-    // Mark as executing
-    setExecutingActions(prev => ({ ...prev, [index]: true }));
-
-    try {
-      // Map recommendation action to API action type
-      const actionMap = {
-        'CLOSE_TEMPORARILY': 'CLOSE_NODE',
-        'REDUCE_FLOW': 'REDUCE_FLOW',
-        'INCREASE_SIGNAGE': 'REROUTE'
-      };
-
-      const response = await fetch(
-        `http://localhost:8000/simulation/${simulationId}/execute-action`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action_type: actionMap[rec.action] || 'REDUCE_FLOW',
-            target_node: rec.exit,
-            duration: 60,
-            intensity: 0.5
-          })
-        }
-      );
-
-      const result = await response.json();
-      console.log('✅ Action executed:', result);
-
-      // Mark as executed
-      setExecutedActions(prev => ({ ...prev, [index]: result }));
-      
-      // Clear executing state
-      setExecutingActions(prev => {
-        const newState = { ...prev };
-        delete newState[index];
-        return newState;
-      });
-
-      // Auto-clear executed state after 5 seconds
-      setTimeout(() => {
-        setExecutedActions(prev => {
-          const newState = { ...prev };
-          delete newState[index];
-          return newState;
-        });
-      }, 5000);
-
-    } catch (error) {
-      console.error('❌ Error executing action:', error);
-      setExecutingActions(prev => {
-        const newState = { ...prev };
-        delete newState[index];
-        return newState;
-      });
-    }
-  };
+  const hasRecommendations = stadiumStatus.recommendations && stadiumStatus.recommendations.length > 0;
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-        🤖 AI Safety Recommendations
-      </h2>
+<<<<<<< HEAD
+    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 border-2 border-purple-200">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-purple-900 flex items-center gap-2">
+          <span>🤖</span>
+          <span>AI Safety Recommendations</span>
+        </h3>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-gray-600">Live Monitoring</span>
+=======
+    <div className="glass-card p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-slate-200">AI Safety Recommendations</h3>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-slate-400">Live Monitoring</span>
+>>>>>>> nikhil
+        </div>
+      </div>
 
       {hasRecommendations ? (
         <div className="space-y-3">
-          {stadiumStatus.recommendations.map((rec, index) => {
-            const isExecuting = executingActions[index];
-            const executedResult = executedActions[index];
-            
-            const priorityColors = {
-              CRITICAL: 'border-red-500 bg-red-50',
-              WARNING: 'border-orange-400 bg-orange-50',
-              INFO: 'border-blue-400 bg-blue-50'
-            };
-
-            return (
-              <div
-                key={index}
-                className={`border-l-4 p-4 ${priorityColors[rec.priority]}`}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <span className={`font-bold text-sm px-2 py-1 rounded ${
-                      rec.priority === 'CRITICAL' ? 'bg-red-600 text-white' :
-                      rec.priority === 'WARNING' ? 'bg-orange-500 text-white' :
-                      'bg-blue-500 text-white'
-                    }`}>
+          {stadiumStatus.recommendations.map((rec, index) => (
+            <div
+              key={index}
+<<<<<<< HEAD
+              className={`p-4 rounded-lg border-l-4 ${
+                rec.priority === 'CRITICAL'
+                  ? 'bg-red-50 border-red-500'
+                  : rec.priority === 'WARNING'
+                  ? 'bg-orange-50 border-orange-500'
+                  : 'bg-blue-50 border-blue-500'
+              } transition-all hover:shadow-md`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">
+                      {rec.priority === 'CRITICAL' ? '🚨' : rec.priority === 'WARNING' ? '⚠️' : 'ℹ️'}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        rec.priority === 'CRITICAL'
+                          ? 'bg-red-500 text-white'
+                          : rec.priority === 'WARNING'
+                          ? 'bg-orange-500 text-white'
+=======
+              className={`p-4 rounded-xl border-l-4 transition-all ${
+                rec.priority === 'CRITICAL'
+                  ? 'bg-red-500/10 border-red-500'
+                  : rec.priority === 'WARNING'
+                  ? 'bg-amber-500/10 border-amber-500'
+                  : 'bg-blue-500/10 border-blue-500'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs font-bold ${
+                        rec.priority === 'CRITICAL'
+                          ? 'bg-red-500 text-white'
+                          : rec.priority === 'WARNING'
+                          ? 'bg-amber-500 text-white'
+>>>>>>> nikhil
+                          : 'bg-blue-500 text-white'
+                      }`}
+                    >
                       {rec.priority}
                     </span>
-                    <span className="ml-2 font-semibold">{rec.exit}</span>
-                    
-                    <p className="mt-2 text-sm text-gray-700">
-                      <strong>Issue:</strong> {rec.reason}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-700">
-                      <strong>💡 Recommendation:</strong> {rec.recommendation}
-                    </p>
+<<<<<<< HEAD
+                    <span className="font-semibold text-gray-700">{rec.location}</span>
                   </div>
-
-                  <div className="ml-4">
-                    {executedResult ? (
-                      <div className="px-3 py-2 bg-green-100 border border-green-500 rounded text-sm">
-                        <div className="font-bold text-green-700">✓ EXECUTED</div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          {executedResult.agents_rerouted || executedResult.agents_affected || 0} agents affected
-                        </div>
-                      </div>
-                    ) : isExecuting ? (
-                      <div className="px-3 py-2 bg-yellow-100 border border-yellow-500 rounded text-sm">
-                        <div className="font-bold text-yellow-700">⏳ EXECUTING...</div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleExecuteAction(rec, index)}
-                        className={`px-4 py-2 rounded font-semibold text-sm ${
-                          rec.priority === 'CRITICAL' 
-                            ? 'bg-red-600 hover:bg-red-700 text-white' 
-                            : rec.priority === 'WARNING'
-                            ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                            : 'bg-blue-500 hover:bg-blue-600 text-white'
-                        }`}
-                      >
-                        {rec.action}
-                      </button>
-                    )}
+                  
+                  <p className="text-sm text-gray-700 mb-2">
+                    <strong>Issue:</strong> {rec.reason}
+                  </p>
+                  
+                  <p className="text-sm text-gray-800 bg-white/60 p-2 rounded">
+                    <strong>💡 Recommendation:</strong> {rec.recommendation}
+=======
+                    <span className="font-semibold text-slate-300">{rec.location}</span>
                   </div>
+                  
+                  <p className="text-sm text-slate-400 mb-2">
+                    <strong className="text-slate-300">Issue:</strong> {rec.reason}
+                  </p>
+                  
+                  <p className="text-sm text-slate-500 bg-slate-800/50 p-2 rounded-lg">
+                    <strong className="text-emerald-400">Recommendation:</strong> {rec.recommendation}
+>>>>>>> nikhil
+                  </p>
                 </div>
+                
+                <button
+<<<<<<< HEAD
+                  className={`ml-4 px-4 py-2 rounded-lg font-semibold text-white transition-all hover:scale-105 ${
+                    rec.priority === 'CRITICAL'
+                      ? 'bg-red-600 hover:bg-red-700'
+                      : rec.priority === 'WARNING'
+                      ? 'bg-orange-600 hover:bg-orange-700'
+                      : 'bg-blue-600 hover:bg-blue-700'
+=======
+                  className={`px-4 py-2 rounded-lg font-semibold text-white text-sm transition-all hover:scale-105 ${
+                    rec.priority === 'CRITICAL'
+                      ? 'bg-red-600 hover:bg-red-500'
+                      : rec.priority === 'WARNING'
+                      ? 'bg-amber-600 hover:bg-amber-500'
+                      : 'bg-blue-600 hover:bg-blue-500'
+>>>>>>> nikhil
+                  }`}
+                >
+                  {rec.action.replace(/_/g, ' ')}
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-green-600">
-          <div className="text-4xl mb-2">✅</div>
-          <p className="font-semibold">All Clear!</p>
+        <div className="text-center py-8">
+<<<<<<< HEAD
+          <div className="text-6xl mb-3">✅</div>
+          <p className="text-lg font-semibold text-green-700">All Clear!</p>
           <p className="text-sm text-gray-600">No safety issues detected</p>
+=======
+          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-lg font-semibold text-emerald-400">All Clear!</p>
+          <p className="text-sm text-slate-500">No safety issues detected</p>
+>>>>>>> nikhil
         </div>
       )}
     </div>
