@@ -1,78 +1,100 @@
-# AI‑Powered Crowd Safety Platform (Domain: AI / Machine Learning)
-Predictive AI for stampede prevention + real‑time crowd flow interventions
 
-## Why this exists (Problem)
+![Visual Overview](Docs/Website_Name.png)
+
+# Introduction
+Crowd-Safety-Sim is an AI-powered crowd management and safety simulation platform designed for large venues, public events, and urban environments where managing crowd density is critical to preventing accidents and emergencies.
+
+The platform enables users to create realistic digital twins of physical spaces and simulate crowd movement using intelligent agents that respond dynamically to congestion, pathways, and exit capacities. By combining real-time simulation with predictive analytics, Crowd-Safety-Sim allows planners and authorities to visualize crowd behavior, identify high-risk zones, and evaluate safety strategies before deploying them in the real world.
+
+To move beyond passive monitoring, Crowd-Safety-Sim integrates an AI-driven intervention layer based on reinforcement learning. This system actively learns optimal strategies—such as controlling inflow, rerouting movement, or managing exits—to reduce unsafe densities and improve evacuation outcomes. All simulations and interventions are tracked transparently, enabling clear comparison between baseline scenarios and AI-assisted decision making.
+
+Crowd-Safety-Sim provides a comprehensive platform for designing, simulating, and optimizing crowd safety using interactive dashboards, visual heatmaps, and intelligent automation—helping decision-makers ensure safer, more resilient public spaces with confidence.
+
+# Why this exists (Problem)
 Large venues (stadiums, railway stations, festivals) often react *after* dangerous crowding happens. Our platform simulates crowds using a digital‑twin venue graph and applies an RL policy to recommend/execute interventions (reroute, reduce inflow, temporary closures) before a stampede forms.
 
-## What we built (Round 1)
-### 1) Digital Twin + Multi‑Agent Simulation (Backend)
-- Venue modeled as a **graph**: nodes = zones/exits/corridors, edges = paths with capacity/width.
-- Crowd modeled as **agents** that navigate via shortest paths and slow down under high density.
-- Real‑time metrics: max density, agents evacuated, danger zones, violations.
+# Tech Stack
+  ## Core Framework & Language
 
-### 2) AI Intervention Layer (Q‑Learning)
-- To move beyond passive monitoring, we introduce an AI-driven intervention layer that actively controls crowd flow in real time.
+  - Python – Primary language for simulation, AI logic, and backend services
 
-- The problem is inherently sequential:
-every action (rerouting, inflow reduction, gate closure) affects how the crowd evolves in the next moments.
-Because of this, the system is modeled using Reinforcement Learning (RL).
-**For Round 1, we implemented a Q-Learning–based policy that:**
-- observes crowd density and occupancy states
-- selects from a small set of human-interpretable interventions
-- optimizes for safety metrics such as peak density, violations, and evacuation time
-- This approach allows the platform to learn intervention timing, not just react to thresholds.
-- The focus in Round 1 is to validate the idea: that policy-based AI control can outperform passive or rule-based crowd monitoring.
+  - FastAPI – High-performance backend framework for building REST APIs
 
-**Roadmap**
-- In subsequent rounds, this RL layer will be extended to Deep RL (DQN / PPO) to support:
-- larger venues
-- continuous state representations
-- trigger-aware optimization (panic, surges, blockages)
+  - JavaScript / TypeScript – Frontend logic and type-safe development
 
-(Planned enhancements are detailed in ROADMAP.md.)
+  ## Simulation & Modeling
 
-### 3) Frontend Dashboard (React)
-- Live heatmap visualization (node density color map)
-- Scenario builder UI (design zones, connect edges, mark exits)
-- “AI vs Baseline” comparison dashboard with charts + action timeline
+  - Custom Crowd Simulation Engine – Agent-based crowd movement modeling
 
----
+  - Graph-Based Venue Modeling – Digital twin representation of real-world spaces
 
-## System Architecture (High level)
-Frontend (React + Tailwind)
-  ↕ REST API
-Backend (FastAPI + Python)
-  ├─ Simulation Engine (multi-agent loop)
-  ├─ Digital Twin (graph topology + density stats)
-  ├─ RL Agent (Q-learning policy)
-  └─ Comparison Runner (baseline vs optimized)
+  - Shortest Path Algorithms – Navigation logic for crowd agents
 
----
+  - Density & Flow Metrics – Real-time calculation of congestion and safety thresholds
 
-## Flow Charts / DFDs (mandatory)
+  ## AI & Machine Learning
 
-### A) DFD: Live Simulation (Level 1)
-User (UI)
-  → POST /simulation/create (scenario + spawn config)
-Backend (FastAPI)
-  → creates Simulator(session_id)
-  → returns initial state
-User (UI)
-  → POST /simulation/step (session_id, steps)
-Backend
-  → sim.step() updates agents, densities, stats
-  → returns updated state
-UI
-  → renders heatmap + agents + alerts
+  - Reinforcement Learning (Q-Learning) – AI-driven intervention strategy learning
+
+  - NumPy – Numerical computations for simulation and learning
+
+  - Custom Reward Functions – Optimized for crowd safety and evacuation efficiency
+
+  ## Backend & API
+
+  - FastAPI REST Services – Simulation control, AI actions, and data exchange
+
+  - JSON-based APIs – Lightweight communication between frontend and backend
+
+  - Python Modular Architecture – Separation of simulation, AI, and API layers
+
+  ## Frontend & Visualization
+
+  - React – Interactive user interface
+
+  - Tailwind CSS – Utility-first styling for rapid UI development
+
+  - Heatmap Visualizations – Real-time crowd density representation
+
+  - Scenario Builder UI – Configure venues, crowd size, and inflow parameters
+
+  ## Data Handling
+
+  - JSON Configuration Files – Venue layouts, simulation parameters, and results
+
+  - In-Memory State Management – Fast simulation iteration and comparison
+
+  ## System Architecture
+
+  - Baseline vs AI-Controlled Comparison – Performance benchmarking
+
+  - Modular Design – Easily extensible for advanced RL models or real-world sensor data
+
+  - Digital Twin Architecture – Mirrors physical crowd environments for safe testing
+
+  - Development & Tooling
+
+  - Git & GitHub – Version control and collaboration
+
+  - VS Code – Primary development environment
+
+  - Python Virtual Environments – Dependency isolation
+
+  - Built to simulate, predict, and prevent crowd safety risks using AI-powered digital twins and intelligent interventions.
+
+
+## Crowd Safety Simulation System - Visual Overview
+
+![Visual Overview](Docs/Visual_Overview.png)
 
 ### B) DFD: AI vs Baseline Comparison
-User (UI)
-  → POST /simulation/compare (scenario + spawn config)
-Backend
-  → load RL model
-  → run_baseline()
-  → run_optimized() (apply actions while stepping)
-  → return comparison report (metrics + action samples)
+User (UI)<br>
+  → POST /simulation/compare (scenario + spawn config)<br>
+Backend<br>
+  → load RL model<br>
+  → run_baseline()<br>
+  → run_optimized() (apply actions while stepping)<br>
+  → return comparison report (metrics + action samples)<br>
 
 ### C) RL Decision Loop (Policy Control)
 For each simulation step:
@@ -86,132 +108,229 @@ For each simulation step:
 
 ---
 
-## Key Results (Round 1 – Verified)
-### Stadium Exit Stress Test (1100 agents)
-**Baseline (No AI)**
-- Max density: 5.00 p/m²
-- Danger violations: 7
-- Evacuation time: 59s
-- Agents reached goal: 1100
+# Inputs & Outputs<br><br>
+## Inputs
 
-**RL‑Optimized**
-- Max density: 4.575 p/m²
-- Danger violations: 5
-- Evacuation time: 55s
-- Agents reached goal: 1100
+Venue Layout (Digital Twin) – Zones, paths, exits, and capacities
 
-**Improvement**
-- Prevented sustained density beyond 4.5 p/m².”
-- Violations prevented: 2
-- Time saved: 4s
+Crowd Parameters – Crowd size, inflow rate, entry points
 
-Sample AI actions:
-- t=2s `reroute_to_alt_exit` @ corridor_north (density 3.125)
-- t=6s `reduce_inflow_50` @ corridor_north (density 4.575)
+Simulation Settings – Time steps, duration, safety thresholds
 
----
+AI Configuration – State space, action space, reward parameters
 
-## Extended Evaluation (Backend Logs)
+## Outputs
 
-To validate robustness, the RL policy was evaluated across multiple runs
-with different random seeds and spawn patterns.
+Crowd Density Metrics – Density per zone over time
 
-Summary (from backend evaluation logs):
+Evacuation Statistics – Total evacuation time and flow rates
 
-- Runs: 20
-- Mean max-density reduction: 7.9% (±1.1%)
-- Violations reduced in: 18 / 20 runs
-- No regressions observed vs baseline
+Safety Indicators – Congestion and threshold violations
 
-  
+AI Decisions – Selected interventions and performance metrics
 
-## What makes this original
-- **Digital twin + RL policy control**: Instead of only showing density heatmaps, we add a policy that *acts* on the system and can be compared vs baseline.
-- **Human‑interpretable interventions**: Actions are explainable (“reduce inflow 25%”, “reroute to alt exits”) and logged with timestamps, so operators can trust it.
-- **Scenario builder approach**: Instead of hardcoding one stadium, the UI supports building venue graphs and testing interventions.
-
----
-
-## How to run locally
-### Backend
-cd backend
-python -m venv venv
-venv\Scripts\activate # Windows
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+Visualization Data – Heatmaps and comparison results
 
 
-### Frontend
-cd frontend
-npm install
-npm run dev
+## Execution Model
+
+At runtime:
+
+Simulation and AI configurations are validated
+
+The crowd simulation is executed step-by-step
+
+The AI intervention layer evaluates the current state
+
+Decisions are applied to the simulation
+
+Outputs are generated and exposed to the frontend
+
+## Core Principles
+
+- Safety First – Minimize unsafe crowd density and congestion
+
+- Predictive Intervention – Act before critical thresholds are breached
+
+- Digital Twin Accuracy – Realistic modeling of physical venues
+
+- AI-Driven Decisions – Reinforcement learning–based optimization
+
+- Transparency – Clear comparison between baseline and AI-controlled runs
+
+
+## Git-Based Collaboration
+
+This project follows a standard Git-based collaboration workflow to ensure safe development, clear reviews, and stable versioning.
 
 
 
-Open: http://localhost:5173 
+# Workflow Overview
+| Step | Action | Description |
+| :---: | :--- | :--- |
+| 1 | **Fork Repository** | Contributors fork the main repository to create an isolated workspace. |
+| 2 | **Create Feature Branch** | Changes are made on a separate branch inside the fork. |
+| 3 | **Develop & Commit** | Features, fixes, or experiments are implemented and committed incrementally. |
+| 4 | **Push Changes** | Commits are pushed to the contributor’s forked repository. |
+| 5 | **Open Pull Request** | A pull request is created to propose changes to the main branch. |
+| 6 | **Review Process** | Maintainers review code, suggest changes, or request improvements. |
+| 7 | **Approval / Rejection** | Pull request is approved or rejected based on review feedback. |
+| 8 | **Merge** | Approved changes are merged into the main branch. |
+| 9 | **Version Update** | A new version or update is created after successful merge. |
 
----
-
-## API Endpoints (Core)
-- GET `/scenarios`
-- POST `/simulation/create`
-- POST `/simulation/step`
-- GET `/simulation/{id}/state`
-- GET `/simulation/{id}/graph`
-- GET `/simulation/{id}/stadium-status`
-- POST `/simulation/compare`
-
----
-
-## Round 2 – Improvements Planned
-
-  Improvment Plan in ROADMAP.md file
+![Git-Based Collaboration](Docs/Git_Based_Collaboration.png)
 
 
----
+
+## Execution Sequence
+![Git-Based Collaboration](Docs/Execution_Sequence.png)
+
+
+
+## Key Responsibilities of the Execution Engine
+
+1) Configuration & Validation
+
+Validate simulation and AI input configurations
+
+Ensure safety thresholds and parameters are correctly defined
+
+2) Simulation Control
+
+Initialize the digital twin and crowd environment
+
+Execute the crowd simulation step-by-step
+
+3) AI Integration
+
+Invoke the AI intervention layer at each timestep
+
+Apply AI-driven actions to control crowd flow and density
+
+4) Metrics & Monitoring
+
+Track crowd density, flow rates, and safety violations
+
+Update system state in real time
+
+5) Output & Integration
+
+Generate structured outputs for analysis and visualization
+
+Expose simulation results through backend APIs to the frontend
+
+
+
+
+# What Problem This Solves
+| Risk | Mitigation |
+| :--- | :--- |
+| **Crowd congestion hotspots** | Real-time density tracking and heatmaps |
+| **Late reaction to crowd buildup** | Predictive AI-based intervention |
+| **Unsafe evacuation planning** | Simulation-based evacuation analysis |
+| **Manual crowd control decisions** | Reinforcement learning–driven actions |
+| **Unverifiable safety improvements** | Baseline vs AI-controlled comparison |
+
+# What Gets Recorded During Simulation
+| Event | Purpose |
+| :--- | :--- |
+| **Scenario initialization** | Defines venue and crowd parameters |
+| **Simulation step execution** | Tracks crowd movement over time |
+| **Density threshold breach** | Identifies unsafe congestion |
+| **AI intervention action** | Records applied control decisions |
+| **Evacuation completion** | Measures overall safety performance |
+| **Result generation** | Enables analysis and visualization |
+
+# Core Concepts
+| Concept | Description |
+| :--- | :--- |
+| **Digital Twin** | Virtual representation of a real venue |
+| **Agent-Based Modeling** | Individual crowd agents with movement logic |
+| **Density Metrics** | Crowd concentration per zone |
+| **Reinforcement Learning** | AI-driven decision making |
+| **Intervention Actions** | Flow control and rerouting strategies |
+| **Scenario Comparison** | Baseline vs AI-assisted evaluation |
+
+# State-Based Decision Model
+Only state summaries are passed to the AI layer.
+
+| State Element | Represents |
+| :--- | :--- |
+| **Zone density** | Current crowd load per area |
+| **Flow rate** | Movement speed between zones |
+| **Exit pressure** | Congestion near exits |
+| **Time step** | Simulation progression |
+| **Safety score** | Overall risk indicator |
+
+Any deviation from safe thresholds triggers AI evaluation and response.
+
+# Simulation Execution Flow
+
+🔹Scenario configuration is loaded
+
+🔹Digital twin environment is initialized
+
+🔹Crowd agents are spawned
+
+🔹Simulation advances step-by-step
+
+🔹AI evaluates current crowd state
+
+🔹Intervention actions are applied
+
+🔹Metrics and outputs are recorded
+
+## User Authorization Model
+| Action | Authorization |
+| :--- | :--- |
+| **Create scenario** | Authorized user |
+| **Run simulation** | System-controlled |
+| **Enable AI intervention** | Config-level permission |
+| **View results** | Read-only access |
+| **Modify parameters** | Editor-level access |
+
+All simulation runs are traceable to configuration inputs.
+
+## Execution Engine Responsibilities
+| Responsibility | Description |
+| :--- | :--- |
+| **Configuration validation** | Ensures safe and valid parameters |
+| **Simulation control** | Manages time steps and agents |
+| **AI invocation** | Calls RL model at runtime |
+| **State updates** | Maintains real-time metrics |
+| **Output generation** | Produces visualization-ready data |
+
+
+## Safety & Reliability Guarantees
+| Guarantee | Achieved By |
+| :--- | :--- |
+| **Predictive safety** | AI-based early intervention |
+| **Risk reduction** | Density-aware control |
+| **Transparency** | Measurable simulation metrics |
+| **Repeatability** | Deterministic simulation setup |
+| **Cost efficiency** | Virtual testing instead of live trials |
+
+
+
 
 ## Case Study (1 example – for judges)
-### “Mahakumbh‑like” scenario replay (What‑If simulation)
+
+“Mahakumbh‑like” scenario replay (What‑If simulation)
 We model a high‑pressure crowd movement scenario with:
-- Converging flows into a narrow corridor (bottleneck)
-- A trigger event (gate malfunction / perceived threat)
-- Panic behavior: increased inflow toward a single exit
 
-**Baseline outcome (no interventions):**
-- Density spikes beyond safe threshold at the bottleneck → repeated danger violations.
+   - Converging flows into a narrow corridor (bottleneck)
+   - A trigger event (gate malfunction / perceived threat)
+   - Panic behavior: increased inflow toward a single exit
 
-**With AI interventions enabled:**
-- Early rerouting to alternative exits
-- Inflow throttling at corridor entry
-- Temporary closure when density becomes critical
+Baseline outcome (no interventions):
+  - Density spikes beyond safe threshold at the bottleneck → repeated danger violations.
 
-**Result:**
-The RL policy reduces peak density and prevents violations by distributing load across multiple exits and delaying inflow before the bottleneck becomes irreversible.
+With AI interventions enabled:
+   - Early rerouting to alternative exits
+   - Inflow throttling at corridor entry
+   - Temporary closure when density becomes critical
 
-(For Round 2, we will attach a full reproducible “Mahakumbh case pack”: scenario JSON + run logs + comparison report + dashboard screenshots.)
-
----
-
-## Project Structure (important folders)
-backend/
-  main.py            # FastAPI API
-  simulation/        # simulator, digital twin, agents, scenarios
-  rl/                # q-learning agent, training, comparison runner
-  ai/                # Reserved for future model extensions
-frontend/
-  src/components/    # canvas view, scenario builder, dashboards
-docs/
-  flows.md           # technical flows/DFDs
-  Rl_training_history
-
----
-
-### CONTRIBUTIONS
-
-## Member1 -> Frontend
-## Member2 -> Backend
-## Member3 -> RL training and Comparisons
-## Member4 -> Research and Documentations
+Result: The RL policy reduces peak density and prevents violations by distributing load across multiple exits and delaying inflow before the bottleneck becomes irreversible.
 
 ## Visual Evidence (Simulation & Results)
 
