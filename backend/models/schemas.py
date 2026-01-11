@@ -48,3 +48,40 @@ class SimulationResponse(BaseModel):
     simulation_id: str
     message: str
     initial_state: SimulationState
+
+class InterventionRequest(BaseModel):
+    """PHASE 2: Request to execute an approved intervention"""
+    node_id: str
+    action: str  # CLOSE_TEMPORARILY, REDUCE_FLOW, REROUTE
+    priority: Optional[str] = None  # CRITICAL, WARNING, INFO
+
+class AutoExecutionSettings(BaseModel):
+    """PHASE 3: Auto-execution settings"""
+    auto_execute_enabled: bool = True
+    disabled_nodes: Optional[List[str]] = None
+    max_pending_actions: Optional[int] = None
+
+class SpawnRateControlRequest(BaseModel):
+    """PHASE 4: Spawn rate control request"""
+    node_id: str
+    rate_multiplier: float  # 0.0 to 1.0
+    duration: Optional[float] = None  # How long to apply (None = permanent)
+
+class CapacityAdjustmentRequest(BaseModel):
+    """PHASE 4: Capacity adjustment request"""
+    node_id: str
+    adjustment_type: str  # expand_area, increase_flow, block_zone, restore
+    factor: Optional[float] = None  # Expansion/increase factor
+    duration: Optional[float] = None  # How long to apply (None = permanent)
+
+class SafetyConstraintsSettings(BaseModel):
+    """PHASE 4: Safety constraints settings"""
+    max_interventions_per_minute: Optional[float] = None
+    min_interval_seconds: Optional[float] = None
+    max_active_interventions: Optional[int] = None
+    enable_rollback: Optional[bool] = None
+    enable_manual_override: Optional[bool] = None
+
+class RollbackRequest(BaseModel):
+    """PHASE 4: Rollback request"""
+    intervention_id: Optional[str] = None  # None = rollback most recent

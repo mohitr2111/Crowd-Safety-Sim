@@ -28,10 +28,22 @@ def _agent_next_node(agent):
 
 
 def _inc_wait(agent, dt: float):
+    """DEPRECATED: Use _block_agent instead for causal blocking (Phase 2)"""
     if hasattr(agent, 'wait_time'):
         agent.wait_time += dt
     else:
         agent.waittime += dt
+
+
+def _block_agent(agent, current_time: float, duration: float):
+    """PHASE 2: Block agent movement until current_time + duration (causal effect)"""
+    if hasattr(agent, 'block_until'):
+        agent.block_until(current_time + duration)
+    elif hasattr(agent, 'blocked_until_time'):
+        agent.blocked_until_time = max(agent.blocked_until_time, current_time + duration)
+    # Fallback: increment wait_time (for backward compatibility)
+    else:
+        _inc_wait(agent, duration)
 
 
 def _agent_path(agent):
@@ -61,17 +73,35 @@ def _agent_set_path(agent, path):
 
 
 def _twin_node_data(sim: Simulator):
-    twin = sim.twin
+    """Get node data from digital twin"""
+    if hasattr(sim, 'digital_twin'):
+        twin = sim.digital_twin
+    elif hasattr(sim, 'twin'):
+        twin = sim.twin
+    else:
+        return {}
+    
     if hasattr(twin, 'node_data'):
         return twin.node_data
-    return twin.nodedata
+    elif hasattr(twin, 'nodedata'):
+        return twin.nodedata
+    return {}
 
 
 def _twin_shortest_path(sim: Simulator, start: str, end: str):
-    twin = sim.twin
+    """Get shortest path from digital twin"""
+    if hasattr(sim, 'digital_twin'):
+        twin = sim.digital_twin
+    elif hasattr(sim, 'twin'):
+        twin = sim.twin
+    else:
+        return None
+    
     if hasattr(twin, 'get_shortest_path'):
         return twin.get_shortest_path(start, end)
-    return twin.getshortestpath(start, end)
+    elif hasattr(twin, 'getshortestpath'):
+        return twin.getshortestpath(start, end)
+    return None
 
 
 class DensityRLTrainer:
@@ -172,22 +202,25 @@ class DensityRLTrainer:
                 print(f"ep={ep}/{episodes} eps={agent.epsilon:.3f} reward={ep_reward:.1f} curMax={cur_max:.2f}")
 
     def apply_action(self, sim: Simulator, node_id: str, action: str):
+        """PHASE 2: Apply intervention with causal blocking effect"""
         agents_dict = getattr(sim, 'agents', {})
         agents = list(agents_dict.values()) if hasattr(agents_dict, 'values') else list(agents_dict)
+        current_time = getattr(sim, 'current_time', getattr(sim, 'time', 0.0))
 
         if action in ('THROTTLE_25', 'THROTTLE_50', 'CLOSE_INFLOW'):
             if action == 'THROTTLE_25':
-                frac, dt = 0.25, 1.5
+                frac, duration = 0.25, 1.5
             elif action == 'THROTTLE_50':
-                frac, dt = 0.50, 2.5
+                frac, duration = 0.50, 2.5
             else:
-                frac, dt = 0.80, 5.0
+                frac, duration = 0.80, 5.0
 
             target = max(1, int(len(agents) * frac))
             affected = 0
             for ag in agents:
                 if _agent_next_node(ag) == node_id:
-                    _inc_wait(ag, dt)
+                    # PHASE 2: Use blocking timestamp for causal effect
+                    _block_agent(ag, current_time, duration)
                     affected += 1
                     if affected >= target:
                         break

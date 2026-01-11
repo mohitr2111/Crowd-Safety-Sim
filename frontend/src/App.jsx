@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ComparisonDashboard from './components/CompariosonDashboard';
 import LiveSimulation from './Pages/AiSimulation';
 import Background3D from './components/Background3D';
+import PhotoToLayout from './components/PhotoToLayout';
 import './App.css';
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
   return (
     <div className="min-h-screen relative">
       <Background3D />
-      
+
       <div className="relative" style={{ zIndex: 1 }}>
         <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/80 border-b border-slate-700/50">
           <div className="max-w-7xl mx-auto px-6 py-5">
@@ -29,7 +30,14 @@ function App() {
                   onClick={() => setActiveTab('live')}
                   className={`tab-button ${activeTab === 'live' ? 'active' : ''}`}
                 >
-                  Live AI Simulation
+                  Live Simulation
+                </button>
+                <button
+                  onClick={() => setActiveTab('photo')}
+                  className={`tab-button ${activeTab === 'photo' ? 'active' : ''}`}
+                >
+                  <span className="hidden sm:inline">Photo to Layout</span>
+                  <span className="sm:hidden">Layout</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('comparison')}
@@ -43,9 +51,13 @@ function App() {
         </header>
 
         <main className="max-w-7xl mx-auto animate-fade-in">
-          {activeTab === 'live' ? (
-            <LiveSimulation />
-          ) : (
+          {activeTab === 'live' && <LiveSimulation />}
+          {activeTab === 'photo' && (
+            <div className="p-6">
+              <PhotoToLayout />
+            </div>
+          )}
+          {activeTab === 'comparison' && (
             <div className="p-6">
               <ComparisonDashboard />
             </div>
@@ -57,3 +69,4 @@ function App() {
 }
 
 export default App;
+

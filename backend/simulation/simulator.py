@@ -94,8 +94,8 @@ class Simulator:
             # Get current node density
             current_density = self.digital_twin.node_data[agent.current_node]["density"]
             
-            # Check if agent should wait due to crowding
-            if agent.should_wait(current_density):
+            # Check if agent should wait due to crowding or intervention blocking
+            if agent.should_wait(current_density, self.current_time):
                 agent.wait_time += self.time_step
                 self.stats["total_wait_time"] += self.time_step
                 continue

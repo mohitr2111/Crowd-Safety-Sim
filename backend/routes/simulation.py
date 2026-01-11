@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 
 from app_state import active_simulations, load_scenario
-from models.schemas import SimulationRequest, SimulationStepRequest
+from models.schemas import SimulationRequest, SimulationStepRequest, InterventionRequest, AutoExecutionSettings
 from rl.comparison import SimulationComparison
 from rl.q_learning_agent import CrowdSafetyQLearning
 from simulation.scenarios import SCENARIOS
@@ -316,6 +316,7 @@ def get_stadium_status(simulation_id: str):
             recommendations.append(
                 {
                     "priority": "CRITICAL",
+                    "node_id": node_id,  # PHASE 2: Include node_id for intervention execution
                     "location": node_id.replace("_", " ").title(),
                     "action": "CLOSE_TEMPORARILY",
                     "reason": f"Density {density:.1f} p/m² exceeds danger threshold ({danger_threshold} p/m²)",
@@ -327,6 +328,7 @@ def get_stadium_status(simulation_id: str):
             recommendations.append(
                 {
                     "priority": "WARNING",
+                    "node_id": node_id,  # PHASE 2: Include node_id for intervention execution
                     "location": node_id.replace("_", " ").title(),
                     "action": "REDUCE_FLOW",
                     "reason": f"Density {density:.1f} p/m² approaching danger level",
@@ -337,6 +339,69 @@ def get_stadium_status(simulation_id: str):
 
     # Sort by density (highest first)
     recommendations.sort(key=lambda x: 0 if x["priority"] == "CRITICAL" else 1)
+
+    # PHASE 3: Process recommendations through auto-execution engine
+    from Components.auto_execution import auto_execution_engine
+    
+    # Initialize if needed
+    if simulation_id not in auto_execution_engine.execution_settings:
+        auto_execution_engine.initialize_simulation(simulation_id)
+    
+    # Check for active triggers
+    active_triggers = simulator.trigger_system.get_active_triggers(simulator.current_time)
+    has_active_trigger = len(active_triggers) > 0
+    
+    # Process each recommendation
+    processed_recommendations = []
+    auto_executed_count = 0
+    
+    for rec in recommendations[:5]:  # Top 5
+        # Build context for risk assessment
+        node_id = rec.get("node_id")
+        density = node_densities.get(node_id, 0.0)
+        
+        context = {
+            "density": density,
+            "has_active_trigger": has_active_trigger,
+            "simulation_time": simulator.current_time,
+        }
+        
+        # Process through auto-execution engine
+        result = auto_execution_engine.process_recommendation(simulation_id, rec, context)
+        
+        # Add processing result to recommendation
+        rec["processing_result"] = result
+        
+        if result.get("status") == "AUTO_EXECUTED":
+            auto_executed_count += 1
+            # Execute the intervention immediately
+            from density_rl.trainer import DensityRLTrainer
+            trainer = DensityRLTrainer()
+            
+            # Map recommendation action to intervention action
+            action_mapping = {
+                "CLOSE_TEMPORARILY": "CLOSE_INFLOW",
+                "REDUCE_FLOW": "THROTTLE_25" if rec.get("priority") == "WARNING" else "THROTTLE_50",
+                "REROUTE": "REROUTE",
+            }
+            intervention_action = action_mapping.get(rec.get("action"), "NOOP")
+            
+            if intervention_action != "NOOP" and node_id:
+                trainer.apply_action(simulator, node_id, intervention_action)
+                
+                # Log auto-execution
+                simulator.ai_actions.append({
+                    'time_seconds': simulator.current_time,
+                    'action': f"Auto-executed: {intervention_action}",
+                    'action_type': intervention_action,
+                    'node': node_id,
+                    'priority': rec.get("priority", "WARNING"),
+                    'human_approved': False,
+                    'auto_executed': True,
+                    'risk_level': result.get("intervention", {}).get("risk_level", "LOW"),
+                })
+        
+        processed_recommendations.append(rec)
 
     # Stadium capacity status
     capacity = 10000
@@ -349,12 +414,591 @@ def get_stadium_status(simulation_id: str):
             "occupancy_percent": occupancy_percent,
             "status": "FULL" if active_agents >= capacity else "AVAILABLE",
         },
-        "recommendations": recommendations[:5],  # Top 5
+        "recommendations": processed_recommendations,
+        "phase3_stats": {
+            "auto_executed": auto_executed_count,
+            "pending_count": len(auto_execution_engine.get_pending_actions(simulation_id)),
+        },
         "timestamp": state.get("time", 0),
         "debug": {
             "total_agents": total_agents,
             "reached_goal": reached_goal,
             "active_agents": active_agents,
             "max_density": max(node_densities.values()) if node_densities else 0,
+        },
+    }
+
+
+@router.post("/{simulation_id}/execute-intervention")
+def execute_intervention(simulation_id: str, intervention: InterventionRequest):
+    """
+    PHASE 2: Execute an approved intervention on a simulation
+    
+    Maps recommendation actions to intervention actions:
+    - CLOSE_TEMPORARILY -> CLOSE_INFLOW
+    - REDUCE_FLOW -> THROTTLE_50 (can be adjusted based on priority)
+    - REROUTE -> REROUTE
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    simulator = active_simulations[simulation_id]
+    
+    # Map recommendation actions to intervention actions
+    action_mapping = {
+        "CLOSE_TEMPORARILY": "CLOSE_INFLOW",
+        "REDUCE_FLOW": "THROTTLE_50",  # Default to moderate throttling
+        "REROUTE": "REROUTE",
+    }
+    
+    # Adjust action based on priority if REDUCE_FLOW
+    intervention_action = action_mapping.get(intervention.action)
+    if not intervention_action:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown action: {intervention.action}. Supported: {list(action_mapping.keys())}"
+        )
+    
+    # Adjust throttling based on priority for REDUCE_FLOW
+    if intervention.action == "REDUCE_FLOW":
+        if intervention.priority == "CRITICAL":
+            intervention_action = "THROTTLE_50"
+        elif intervention.priority == "WARNING":
+            intervention_action = "THROTTLE_25"
+        else:
+            intervention_action = "THROTTLE_25"
+    
+    # Verify node exists
+    if intervention.node_id not in simulator.digital_twin.node_data:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Node {intervention.node_id} not found in simulation"
+        )
+    
+    # Apply intervention using DensityRLTrainer
+    from density_rl.trainer import DensityRLTrainer
+    
+    trainer = DensityRLTrainer()
+    trainer.apply_action(simulator, intervention.node_id, intervention_action)
+    
+    # Log the intervention
+    simulator.ai_actions.append({
+        'time_seconds': simulator.current_time,
+        'action': f"Human-approved: {intervention_action}",
+        'action_type': intervention_action,
+        'node': intervention.node_id,
+        'priority': intervention.priority or 'WARNING',
+        'human_approved': True,
+        'original_recommendation': intervention.action,
+    })
+    
+    # Get updated state
+    state = simulator.get_simulation_state()
+    
+    return {
+        "simulation_id": simulation_id,
+        "status": "success",
+        "intervention_applied": {
+            "node_id": intervention.node_id,
+            "action": intervention_action,
+            "original_recommendation": intervention.action,
+            "priority": intervention.priority,
+        },
+        "message": f"Intervention {intervention_action} applied to {intervention.node_id}",
+        "current_state": state,
+    }
+
+
+# ============================================================================
+# PHASE 3: CONTROLLED AUTONOMY ENDPOINTS
+# ============================================================================
+
+@router.get("/{simulation_id}/pending-actions")
+def get_pending_actions(simulation_id: str):
+    """
+    PHASE 3: Get all pending actions awaiting approval
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    
+    pending = auto_execution_engine.get_pending_actions(simulation_id)
+    
+    return {
+        "simulation_id": simulation_id,
+        "pending_actions": pending,
+        "count": len(pending),
+    }
+
+
+@router.post("/{simulation_id}/pending-actions/{action_id}/approve")
+def approve_pending_action(simulation_id: str, action_id: str):
+    """
+    PHASE 3: Approve a pending intervention action
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    from density_rl.trainer import DensityRLTrainer
+    
+    simulator = active_simulations[simulation_id]
+    
+    # Get and approve the action
+    pending = auto_execution_engine.approve_action(simulation_id, action_id)
+    if not pending:
+        raise HTTPException(status_code=404, detail="Pending action not found")
+    
+    # Execute the intervention
+    trainer = DensityRLTrainer()
+    trainer.apply_action(simulator, pending.node_id, pending.action)
+    
+    # Mark as executed
+    pending.status = "EXECUTED"
+    
+    # Log the intervention
+    simulator.ai_actions.append({
+        'time_seconds': simulator.current_time,
+        'action': f"Supervisor-approved: {pending.action}",
+        'action_type': pending.action,
+        'node': pending.node_id,
+        'priority': pending.priority,
+        'human_approved': True,
+        'action_id': action_id,
+        'risk_level': pending.risk_level,
+    })
+    
+    # Log to audit
+    auto_execution_engine._log_action(simulation_id, {
+        "type": "ACTION_EXECUTED",
+        "action_id": action_id,
+        "node_id": pending.node_id,
+        "action": pending.action,
+        "time": simulator.current_time,
+    })
+    
+    state = simulator.get_simulation_state()
+    
+    return {
+        "simulation_id": simulation_id,
+        "status": "success",
+        "action_id": action_id,
+        "message": f"Intervention {pending.action} approved and executed on {pending.node_id}",
+        "intervention": pending.to_dict(),
+        "current_state": state,
+    }
+
+
+@router.post("/{simulation_id}/pending-actions/{action_id}/reject")
+def reject_pending_action(simulation_id: str, action_id: str):
+    """
+    PHASE 3: Reject a pending intervention action
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    
+    pending = auto_execution_engine.reject_action(simulation_id, action_id)
+    if not pending:
+        raise HTTPException(status_code=404, detail="Pending action not found")
+    
+    return {
+        "simulation_id": simulation_id,
+        "status": "success",
+        "action_id": action_id,
+        "message": f"Intervention {pending.action} rejected",
+        "intervention": pending.to_dict(),
+    }
+
+
+@router.post("/{simulation_id}/settings/auto-execute")
+def update_auto_execution_settings(simulation_id: str, settings: AutoExecutionSettings):
+    """
+    PHASE 3: Update auto-execution settings for a simulation
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    
+    auto_execution_engine.update_settings(
+        simulation_id,
+        auto_execute_enabled=settings.auto_execute_enabled,
+        disabled_nodes=settings.disabled_nodes
+    )
+    
+    # Log to audit
+    auto_execution_engine._log_action(simulation_id, {
+        "type": "SETTINGS_UPDATED",
+        "auto_execute_enabled": settings.auto_execute_enabled,
+        "disabled_nodes": settings.disabled_nodes or [],
+        "time": active_simulations[simulation_id].current_time,
+    })
+    
+    return {
+        "simulation_id": simulation_id,
+        "status": "success",
+        "message": "Auto-execution settings updated",
+        "settings": {
+            "auto_execute_enabled": settings.auto_execute_enabled,
+            "disabled_nodes": settings.disabled_nodes or [],
+        },
+    }
+
+
+@router.get("/{simulation_id}/settings/auto-execute")
+def get_auto_execution_settings(simulation_id: str):
+    """
+    PHASE 3: Get current auto-execution settings
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    
+    if simulation_id not in auto_execution_engine.execution_settings:
+        auto_execution_engine.initialize_simulation(simulation_id)
+    
+    settings = auto_execution_engine.execution_settings[simulation_id]
+    
+    return {
+        "simulation_id": simulation_id,
+        "settings": settings,
+    }
+
+
+@router.get("/{simulation_id}/audit-log")
+def get_audit_log(simulation_id: str, limit: int = 100):
+    """
+    PHASE 3: Get audit log for a simulation
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.auto_execution import auto_execution_engine
+    
+    audit_log = auto_execution_engine.get_audit_log(simulation_id, limit=limit)
+    
+    return {
+        "simulation_id": simulation_id,
+        "audit_log": audit_log,
+        "count": len(audit_log),
+    }
+
+
+# ============================================================================
+# PHASE 4: PARTIAL AUTONOMY ENDPOINTS
+# ============================================================================
+
+@router.post("/{simulation_id}/spawn-control")
+def control_spawn_rate(simulation_id: str, request: dict):
+    """
+    PHASE 4: Control spawn rate at entry nodes
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.spawn_control import spawn_rate_controller
+    
+    node_id = request.get("node_id")
+    rate_multiplier = request.get("rate_multiplier", 1.0)
+    duration = request.get("duration")
+    current_time = active_simulations[simulation_id].current_time
+    
+    spawn_rate_controller.set_spawn_rate(node_id, rate_multiplier, duration, current_time)
+    
+    state = spawn_rate_controller.get_state(node_id)
+    
+    return {
+        "simulation_id": simulation_id,
+        "message": f"Spawn rate control applied to {node_id}",
+        "state": state,
+    }
+
+
+@router.get("/{simulation_id}/spawn-control/{node_id}")
+def get_spawn_control_state(simulation_id: str, node_id: str):
+    """
+    PHASE 4: Get spawn control state for a node
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.spawn_control import spawn_rate_controller
+    
+    state = spawn_rate_controller.get_state(node_id)
+    
+    if state is None:
+        raise HTTPException(status_code=404, detail=f"Spawn control not initialized for node {node_id}")
+    
+    return {
+        "simulation_id": simulation_id,
+        "node_id": node_id,
+        "state": state,
+    }
+
+
+@router.post("/{simulation_id}/capacity-adjustment")
+def adjust_capacity(simulation_id: str, request: dict):
+    """
+    PHASE 4: Adjust node or edge capacity
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.capacity_control import capacity_controller
+    
+    simulator = active_simulations[simulation_id]
+    node_id = request.get("node_id")
+    adjustment_type = request.get("adjustment_type")
+    factor = request.get("factor")
+    duration = request.get("duration")
+    current_time = simulator.current_time
+    
+    # Register nodes/edges if not already registered
+    for node_id_twin, node_data in simulator.digital_twin.node_data.items():
+        capacity_controller.register_node(
+            node_id_twin,
+            node_data["area_m2"],
+            node_data.get("capacity", 0)
+        )
+    
+    success = False
+    if adjustment_type == "expand_area":
+        success = capacity_controller.expand_node_area(node_id, factor, duration, current_time)
+    elif adjustment_type == "block_zone":
+        success = capacity_controller.block_zone(node_id, duration, current_time)
+    elif adjustment_type == "restore":
+        success = capacity_controller.restore_node(node_id)
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown adjustment type: {adjustment_type}")
+    
+    if not success:
+        raise HTTPException(status_code=400, detail=f"Failed to apply capacity adjustment")
+    
+    state = capacity_controller.get_node_state(node_id)
+    
+    return {
+        "simulation_id": simulation_id,
+        "message": f"Capacity adjustment applied to {node_id}",
+        "state": state,
+    }
+
+
+@router.get("/{simulation_id}/capacity/{node_id}")
+def get_capacity_state(simulation_id: str, node_id: str):
+    """
+    PHASE 4: Get capacity state for a node
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.capacity_control import capacity_controller
+    
+    state = capacity_controller.get_node_state(node_id)
+    
+    if state is None:
+        # Return original capacity from digital twin
+        simulator = active_simulations[simulation_id]
+        if node_id in simulator.digital_twin.node_data:
+            node_data = simulator.digital_twin.node_data[node_id]
+            return {
+                "simulation_id": simulation_id,
+                "node_id": node_id,
+                "state": {
+                    "current_area_m2": node_data["area_m2"],
+                    "current_capacity": node_data.get("capacity", 0),
+                    "is_blocked": False,
+                },
+            }
+        raise HTTPException(status_code=404, detail=f"Node {node_id} not found")
+    
+    return {
+        "simulation_id": simulation_id,
+        "node_id": node_id,
+        "state": state,
+    }
+
+
+@router.get("/{simulation_id}/monitoring/health")
+def get_system_health(simulation_id: str):
+    """
+    PHASE 4: Get system health metrics
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.advanced_monitoring import advanced_monitoring
+    from Components.auto_execution import auto_execution_engine
+    
+    simulator = active_simulations[simulation_id]
+    state = simulator.get_simulation_state()
+    
+    # Calculate node densities
+    node_densities = {}
+    for node_id, node_state in state.get("nodes", {}).items():
+        node_data = simulator.digital_twin.node_data.get(node_id, {})
+        area_m2 = node_data.get("area_m2", 1)
+        current_count = node_state.get("current_count", 0)
+        density = current_count / area_m2 if area_m2 > 0 else 0
+        node_densities[node_id] = density
+    
+    # Record density snapshot
+    advanced_monitoring.record_density_snapshot(simulator.current_time, node_densities)
+    
+    # Get active interventions
+    active_interventions = len(auto_execution_engine.get_pending_actions(simulation_id))
+    danger_zone_count = len(simulator.digital_twin.get_danger_zones())
+    
+    # Calculate health metrics
+    health = advanced_monitoring.calculate_system_health(
+        simulator.current_time,
+        node_densities,
+        active_interventions,
+        danger_zone_count
+    )
+    
+    return {
+        "simulation_id": simulation_id,
+        "health": {
+            "overall_status": health.overall_status.value,
+            "intervention_frequency": health.intervention_frequency,
+            "average_effectiveness": health.average_effectiveness,
+            "danger_zone_count": health.danger_zone_count,
+            "max_density": health.max_density,
+            "active_interventions": health.active_interventions,
+            "system_stability": health.system_stability,
+            "last_updated": health.last_updated,
+        },
+    }
+
+
+@router.get("/{simulation_id}/monitoring/stampede-prediction")
+def get_stampede_prediction(simulation_id: str):
+    """
+    PHASE 4: Get predictive stampede probability
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.advanced_monitoring import advanced_monitoring
+    from Components.failsafe_mechanisms import failsafe_mechanisms
+    
+    simulator = active_simulations[simulation_id]
+    state = simulator.get_simulation_state()
+    
+    # Calculate node densities
+    node_densities = {}
+    for node_id, node_state in state.get("nodes", {}).items():
+        node_data = simulator.digital_twin.node_data.get(node_id, {})
+        area_m2 = node_data.get("area_m2", 1)
+        current_count = node_state.get("current_count", 0)
+        density = current_count / area_m2 if area_m2 > 0 else 0
+        node_densities[node_id] = density
+    
+    # Get active triggers
+    active_triggers = simulator.trigger_system.get_active_triggers(simulator.current_time)
+    
+    # Get intervention frequency
+    safety_status = failsafe_mechanisms.get_safety_status(simulator.current_time)
+    intervention_frequency = safety_status["current_status"]["current_frequency"]
+    
+    # Predict stampede probability
+    prediction = advanced_monitoring.predict_stampede_probability(
+        node_densities,
+        simulator.current_time,
+        active_triggers,
+        intervention_frequency
+    )
+    
+    return {
+        "simulation_id": simulation_id,
+        "prediction": {
+            "probability": prediction.probability,
+            "risk_level": prediction.risk_level,
+            "predicted_time": prediction.predicted_time,
+            "contributing_factors": prediction.contributing_factors,
+            "confidence": prediction.confidence,
+            "last_updated": prediction.last_updated,
+        },
+    }
+
+
+@router.get("/{simulation_id}/safety/status")
+def get_safety_status(simulation_id: str):
+    """
+    PHASE 4: Get safety constraints status
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.failsafe_mechanisms import failsafe_mechanisms
+    
+    simulator = active_simulations[simulation_id]
+    status = failsafe_mechanisms.get_safety_status(simulator.current_time)
+    
+    return {
+        "simulation_id": simulation_id,
+        "safety_status": status,
+    }
+
+
+@router.post("/{simulation_id}/safety/constraints")
+def update_safety_constraints(simulation_id: str, request: dict):
+    """
+    PHASE 4: Update safety constraints
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.failsafe_mechanisms import failsafe_mechanisms
+    
+    failsafe_mechanisms.configure_constraints(
+        max_interventions_per_minute=request.get("max_interventions_per_minute"),
+        min_interval_seconds=request.get("min_interval_seconds"),
+        max_active_interventions=request.get("max_active_interventions"),
+        enable_rollback=request.get("enable_rollback"),
+        enable_manual_override=request.get("enable_manual_override"),
+    )
+    
+    simulator = active_simulations[simulation_id]
+    status = failsafe_mechanisms.get_safety_status(simulator.current_time)
+    
+    return {
+        "simulation_id": simulation_id,
+        "message": "Safety constraints updated",
+        "safety_status": status,
+    }
+
+
+@router.post("/{simulation_id}/safety/rollback")
+def rollback_intervention(simulation_id: str, request: dict):
+    """
+    PHASE 4: Rollback an intervention
+    """
+    if simulation_id not in active_simulations:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    from Components.failsafe_mechanisms import failsafe_mechanisms
+    
+    simulator = active_simulations[simulation_id]
+    intervention_id = request.get("intervention_id")
+    
+    record = failsafe_mechanisms.rollback_intervention(intervention_id, simulator.current_time)
+    
+    if record is None:
+        raise HTTPException(status_code=400, detail="Failed to rollback intervention")
+    
+    return {
+        "simulation_id": simulation_id,
+        "message": f"Intervention {intervention_id or 'most recent'} rolled back",
+        "intervention": {
+            "intervention_id": record.intervention_id,
+            "action_type": record.action_type,
+            "node_id": record.node_id,
+            "applied_at": record.applied_at,
+            "rolled_back_at": record.rolled_back_at,
         },
     }

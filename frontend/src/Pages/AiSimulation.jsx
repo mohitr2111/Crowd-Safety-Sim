@@ -6,6 +6,11 @@ import CrowdSizeSelector from '../components/CrowdSizeSelector';
 import AIActionLogger from '../components/AiActionLogger';
 import CaseStudyAnalysis from '../components/CaseStudyAnalysis';
 import VenueBuilder from '../components/VenueBuilder';
+import Phase4Controls from '../components/Phase4Controls';
+import AdvancedMonitoring from '../components/AdvancedMonitoring';
+import SafetyStatus from '../components/SafetyStatus';
+import ScenarioSelector, { SCENARIOS } from '../components/ScenarioSelector';
+import PanicIndicator, { TRIGGER_TYPES } from '../components/PanicIndicator';
 
 const LiveSimulation = () => {
   const [selectedScenario, setSelectedScenario] = useState('stadium_exit');
@@ -26,7 +31,7 @@ const LiveSimulation = () => {
   ]);
 
   const [scenarios, setScenarios] = useState([]);
-  
+
   useEffect(() => {
     const fetchScenarios = async () => {
       try {
@@ -51,21 +56,21 @@ const LiveSimulation = () => {
           time_step: 1.0
         })
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to create simulation');
       }
-      
+
       const data = await response.json();
       setSimulationId(data.simulation_id);
       setState(data.initial_state);
-      
+
       const graphResponse = await fetch(
         `http://localhost:8000/simulation/${data.simulation_id}/graph`
       );
       const graphData = await graphResponse.json();
       setGraphData(graphData);
-      
+
       console.log('Simulation created:', data.simulation_id);
     } catch (error) {
       console.error('Error creating simulation:', error);
@@ -75,7 +80,7 @@ const LiveSimulation = () => {
 
   const stepSimulation = async () => {
     if (!simulationId) return;
-    
+
     try {
       const response = await fetch('http://localhost:8000/simulation/step', {
         method: 'POST',
@@ -85,7 +90,7 @@ const LiveSimulation = () => {
           steps: 1
         })
       });
-      
+
       const data = await response.json();
       setState(data.current_state);
     } catch (error) {
@@ -95,7 +100,7 @@ const LiveSimulation = () => {
 
   useEffect(() => {
     if (!simulationId || !isPlaying) return;
-    
+
     const fetchStadiumStatus = async () => {
       try {
         const response = await fetch(
@@ -107,7 +112,7 @@ const LiveSimulation = () => {
         console.error('Error fetching stadium status:', error);
       }
     };
-    
+
     fetchStadiumStatus();
     const interval = setInterval(fetchStadiumStatus, 2000);
     return () => clearInterval(interval);
@@ -115,7 +120,7 @@ const LiveSimulation = () => {
 
   useEffect(() => {
     if (!simulationId) return;
-    
+
     const fetchAIData = async () => {
       try {
         const response = await fetch(
@@ -128,7 +133,7 @@ const LiveSimulation = () => {
         console.error('Error fetching AI data:', error);
       }
     };
-    
+
     fetchAIData();
     const interval = setInterval(fetchAIData, 1000);
     return () => clearInterval(interval);
@@ -166,6 +171,7 @@ const LiveSimulation = () => {
   const tabs = [
     { id: 'simulation', label: 'Simulation' },
     { id: 'actions', label: 'AI Actions' },
+    { id: 'phase4', label: 'Phase 4 Controls' },
     { id: 'builder', label: 'Venue Builder' },
     { id: 'cases', label: 'Case Studies' }
   ];
@@ -198,23 +204,33 @@ const LiveSimulation = () => {
           {activeTab === 'simulation' && (
             <div className="space-y-6">
               {!simulationId && (
-                <div className="glass-card p-6">
-                  <label className="block text-sm font-semibold mb-3 text-slate-300">
-                    Select Scenario
-                  </label>
-                  <select
-                    value={selectedScenario}
-                    onChange={(e) => setSelectedScenario(e.target.value)}
-                    className="input-modern"
-                  >
-                    <option value="stadium_exit">Stadium Exit</option>
-                    <option value="railway_station">Railway Station</option>
-                  </select>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <ScenarioSelector
+                      selectedScenario={selectedScenario}
+                      onSelect={setSelectedScenario}
+                      agentCount={spawnConfig.reduce((sum, cfg) => sum + cfg.count, 0)}
+                      onAgentCountChange={(count) => {
+                        const scenario = SCENARIOS.find(s => s.id === selectedScenario);
+                        const entry = scenario?.id === 'stadium_exit' ? 'zone_north' :
+                          scenario?.id === 'railway_station' ? 'entry_main' :
+                            scenario?.id === 'festival_corridor' ? 'entry_gate' : 'entry_north';
+                        const exit = 'exit_main';
+                        setSpawnConfig([{ start: entry, goal: exit, count, type: 'normal' }]);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <PanicIndicator
+                      panicState={{}}
+                      disabled={true}
+                    />
+                  </div>
                 </div>
               )}
 
               {!simulationId && (
-                <CrowdSizeSelector 
+                <CrowdSizeSelector
                   selectedScenario={selectedScenario}
                   onSelectPreset={(config) => setSpawnConfig(config)}
                 />
@@ -234,15 +250,14 @@ const LiveSimulation = () => {
                   <div className="flex flex-col md:flex-row gap-4">
                     <button
                       onClick={() => setIsPlaying(!isPlaying)}
-                      className={`flex-1 font-bold py-3 px-6 rounded-xl transition-all ${
-                        isPlaying
+                      className={`flex-1 font-bold py-3 px-6 rounded-xl transition-all ${isPlaying
                           ? 'bg-orange-500 hover:bg-orange-600 text-white'
                           : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                      }`}
+                        }`}
                     >
                       {isPlaying ? 'Pause' : 'Play'}
                     </button>
-                    
+
                     <button
                       onClick={stepSimulation}
                       disabled={isPlaying}
@@ -250,7 +265,7 @@ const LiveSimulation = () => {
                     >
                       Step Forward
                     </button>
-                    
+
                     <button
                       onClick={resetSimulation}
                       className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 font-bold py-3 px-6 rounded-xl transition-all"
@@ -283,7 +298,14 @@ const LiveSimulation = () => {
               )}
 
               {simulationId && stadiumStatus && (
-                <AIRecommendations stadiumStatus={stadiumStatus} />
+                <AIRecommendations
+                  stadiumStatus={stadiumStatus}
+                  simulationId={simulationId}
+                  onInterventionExecuted={(result) => {
+                    console.log('Intervention executed:', result);
+                    // Optionally refresh state or show notification
+                  }}
+                />
               )}
 
               {state && (
@@ -293,35 +315,35 @@ const LiveSimulation = () => {
                     <div className="stat-card">
                       <div className="text-sm text-slate-400 mb-1">Active Agents</div>
                       <div className="text-2xl font-bold text-blue-400">
-                        {state.total_agents 
+                        {state.total_agents
                           ? (state.total_agents - (state.reached_goal || 0))
                           : Object.keys(state.agents || {}).length
                         }
                       </div>
                     </div>
-                    
+
                     <div className="stat-card">
                       <div className="text-sm text-slate-400 mb-1">Reached Goal</div>
                       <div className="text-2xl font-bold text-emerald-400">
                         {state.reached_goal || state.stats?.agents_reached_goal || 0}
                       </div>
                     </div>
-                    
+
                     <div className="stat-card">
                       <div className="text-sm text-slate-400 mb-1">Max Density</div>
                       <div className="text-2xl font-bold text-orange-400">
-                        {state.max_density?.toFixed(2) 
-                          || state.stats?.max_density_reached?.toFixed(2) 
+                        {state.max_density?.toFixed(2)
+                          || state.stats?.max_density_reached?.toFixed(2)
                           || '0.00'
                         } p/m²
                       </div>
                     </div>
-                    
+
                     <div className="stat-card">
                       <div className="text-sm text-slate-400 mb-1">Danger Zones</div>
                       <div className="text-2xl font-bold text-red-400">
-                        {state.danger_zones?.length 
-                          || state.stats?.danger_violations 
+                        {state.danger_zones?.length
+                          || state.stats?.danger_violations
                           || 0
                         }
                       </div>
@@ -334,6 +356,38 @@ const LiveSimulation = () => {
 
           {activeTab === 'actions' && (
             <AIActionLogger simulationData={{ ai_actions: aiActions }} stampedePrediction={stampedePrediction} />
+          )}
+
+          {activeTab === 'phase4' && (
+            <div className="space-y-6">
+              {simulationId ? (
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Phase4Controls simulationId={simulationId} nodes={state?.nodes} />
+                    <SafetyStatus simulationId={simulationId} />
+                  </div>
+                  <AdvancedMonitoring simulationId={simulationId} />
+                </>
+              ) : (
+                <div className="glass-card p-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-300 mb-2">Phase 4 Controls</h3>
+                  <p className="text-slate-500 mb-6">
+                    Create a simulation to access Phase 4 advanced controls and monitoring
+                  </p>
+                  <button
+                    onClick={createSimulation}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all"
+                  >
+                    Create Simulation
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {activeTab === 'builder' && (
