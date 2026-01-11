@@ -103,7 +103,9 @@ class SimulationComparison:
         }
     
     def _apply_action(self, sim: Simulator, node_id: str, action: str):
-        """Apply RL action (same as trainer)"""
+        """PHASE 2: Apply RL action with causal blocking effect"""
+        current_time = getattr(sim, 'current_time', getattr(sim, 'time', 0.0))
+        
         if action == "no_action":
             pass
         elif action == "reduce_inflow_25":
@@ -111,7 +113,8 @@ class SimulationComparison:
             target_count = max(1, len(sim.agents) * 0.25)
             for agent in sim.agents.values():
                 if agent.get_next_node() == node_id:
-                    agent.wait_time += 1.0
+                    # PHASE 2: Use blocking timestamp for causal effect
+                    agent.block_until(current_time + 1.0)
                     affected_count += 1
                     if affected_count >= target_count:
                         break
@@ -120,14 +123,16 @@ class SimulationComparison:
             target_count = max(1, len(sim.agents) * 0.5)
             for agent in sim.agents.values():
                 if agent.get_next_node() == node_id:
-                    agent.wait_time += 2.0
+                    # PHASE 2: Use blocking timestamp for causal effect
+                    agent.block_until(current_time + 2.0)
                     affected_count += 1
                     if affected_count >= target_count:
                         break
         elif action == "close_inflow":
             for agent in sim.agents.values():
                 if agent.get_next_node() == node_id:
-                    agent.wait_time += 5.0
+                    # PHASE 2: Use blocking timestamp for causal effect
+                    agent.block_until(current_time + 5.0)
         elif action == "reroute_to_alt_exit":
             for agent in sim.agents.values():
                 if node_id in (agent.path or []):

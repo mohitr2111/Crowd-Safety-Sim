@@ -1,6 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { simulationApi } from '../api/simulationApi';
 
-const AIRecommendations = ({ stadiumStatus }) => {
+const AIRecommendations = ({ stadiumStatus, simulationId, onInterventionExecuted }) => {
+  const [executing, setExecuting] = useState({});
+  
+  const handleApprove = async (rec) => {
+    if (!simulationId || !rec.node_id) {
+      console.error('Missing simulationId or node_id');
+      return;
+    }
+    
+    const key = `${rec.node_id}-${rec.action}`;
+    setExecuting({ ...executing, [key]: true });
+    
+    try {
+      const result = await simulationApi.executeIntervention(
+        simulationId,
+        rec.node_id,
+        rec.action,
+        rec.priority
+      );
+      
+      console.log('Intervention executed:', result);
+      
+      // Notify parent component
+      if (onInterventionExecuted) {
+        onInterventionExecuted(result);
+      }
+      
+      // Show success message
+      alert(`Intervention applied: ${result.message}`);
+      
+    } catch (error) {
+      console.error('Error executing intervention:', error);
+      alert(`Failed to execute intervention: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setExecuting({ ...executing, [key]: false });
+    }
+  };
   if (!stadiumStatus) return null;
 
   const hasRecommendations = stadiumStatus.recommendations && stadiumStatus.recommendations.length > 0;
@@ -55,7 +92,9 @@ const AIRecommendations = ({ stadiumStatus }) => {
                 </div>
                 
                 <button
-                  className={`px-4 py-2 rounded-lg font-semibold text-white text-sm transition-all hover:scale-105 ${
+                  onClick={() => handleApprove(rec)}
+                  disabled={executing[`${rec.node_id}-${rec.action}`]}
+                  className={`px-4 py-2 rounded-lg font-semibold text-white text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
                     rec.priority === 'CRITICAL'
                       ? 'bg-red-600 hover:bg-red-500'
                       : rec.priority === 'WARNING'
@@ -63,7 +102,11 @@ const AIRecommendations = ({ stadiumStatus }) => {
                       : 'bg-blue-600 hover:bg-blue-500'
                   }`}
                 >
-                  {rec.action.replace(/_/g, ' ')}
+                  {executing[`${rec.node_id}-${rec.action}`] ? (
+                    'Executing...'
+                  ) : (
+                    `✓ Approve ${rec.action.replace(/_/g, ' ')}`
+                  )}
                 </button>
               </div>
             </div>
