@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-@import "tailwindcss";
-=======
 @import "tailwindcss";
 
 :root {
@@ -193,4 +190,3 @@ select.input-modern {
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
->>>>>>> nikhil
