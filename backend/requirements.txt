@@ -2,8 +2,5 @@ fastapi
 uvicorn
 pydantic
 numpy
-<<<<<<< HEAD
-=======
 networkx
 matplotlib
->>>>>>> nikhil
