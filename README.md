@@ -34,7 +34,7 @@ Large venues (stadiums, railway stations, festivals) often react *after* dangero
 
   ## Computer Vision & Layout Extraction
 
-  - OpenCV (Python)
+   ### OpenCV (Python)
     - Static venue image processing (floor plans, maps, photos)
     - Walkable vs non-walkable area segmentation
     - Corridor, boundary, and obstacle detection
