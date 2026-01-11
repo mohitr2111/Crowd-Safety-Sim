@@ -32,6 +32,16 @@ Large venues (stadiums, railway stations, festivals) often react *after* dangero
 
   - Density & Flow Metrics – Real-time calculation of congestion and safety thresholds
 
+  ## Computer Vision & Layout Extraction
+
+  - OpenCV (Python)
+    - Static venue image processing (floor plans, maps, photos)
+    - Walkable vs non-walkable area segmentation
+    - Corridor, boundary, and obstacle detection
+    - Exit and bottleneck identification
+    - Image-assisted digital twin initialization
+
+
   ## AI & Machine Learning
 
   - Reinforcement Learning (Q-Learning) – AI-driven intervention strategy learning
@@ -130,6 +140,59 @@ Safety Indicators – Congestion and threshold violations
 AI Decisions – Selected interventions and performance metrics
 
 Visualization Data – Heatmaps and comparison results
+
+## Computer Vision–Assisted Venue Layout Generation (OpenCV)
+
+Crowd-Safety-Sim integrates **OpenCV-based computer vision** to assist in transforming
+**static venue images** (floor plans, maps, aerial photos) into
+**simulation-ready digital twin layouts**.
+
+This module reduces manual configuration effort by extracting spatial
+structure directly from images and converting it into graph-based
+representations used by the simulation engine.
+
+> ⚠️ This system operates **only on static images** and does **not**
+> perform real-time monitoring, surveillance, or individual tracking.
+
+### OpenCV Image-to-Layout Pipeline (Offline)
+
+OpenCV is applied **before simulation begins** to assist venue modeling:
+
+- Image preprocessing
+  - Grayscale conversion
+  - Noise reduction
+  - Perspective correction (optional)
+
+- Structural feature extraction
+  - Edge detection (walls, boundaries)
+  - Contour detection (zones and open areas)
+  - Corridor and pathway identification
+  - Exit region marking
+
+- Walkability map generation
+  - Binary segmentation of walkable vs non-walkable regions
+  - Obstacle masking
+
+- Digital twin graph construction
+  - Convert extracted regions into nodes and edges
+  - Assign capacity estimates based on area and width
+
+The resulting graph is directly consumed by the crowd simulation engine.
+
+### Image-to-Digital-Twin Flow
+
+Venue Image (Floor Plan / Photo)
+        ↓
+OpenCV Preprocessing
+        ↓
+Structural Feature Extraction
+        ↓
+Walkability & Zone Segmentation
+        ↓
+Graph-Based Digital Twin
+        ↓
+Crowd Simulation + AI Intervention
+
 
 
 ## Execution Model
@@ -311,6 +374,18 @@ All simulation runs are traceable to configuration inputs.
 | **Cost efficiency** | Virtual testing instead of live trials |
 
 
+### Privacy & Ethical Design (Computer Vision)
+
+The computer vision module in Crowd-Safety-Sim:
+
+- Processes **only static images**
+- Does **not analyze live video streams**
+- Does **not perform facial recognition**
+- Does **not track individuals**
+- Is used strictly for **offline infrastructure layout extraction**
+
+This ensures the system remains privacy-preserving and compliant with
+ethical AI principles.
 
 
 ## Case Study (1 example – for judges)
