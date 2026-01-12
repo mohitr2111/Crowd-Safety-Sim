@@ -423,7 +423,7 @@ The architecture intentionally prioritizes **robustness, explainability, human o
 
 ## 🌍 Real-World Usage Scenarios
 
-### 1️⃣ Pre-Event Planning & What-If Analysis
+### 1️ Pre-Event Planning & What-If Analysis
 
 Before an event, venue operators can:
 
@@ -441,7 +441,7 @@ This enables **risk mitigation before crowds assemble**, rather than reactive re
 
 ---
 
-### 2️⃣ Live Event Monitoring (Decision-Support Mode)
+### 2️ Live Event Monitoring (Decision-Support Mode)
 
 During live events:
 
@@ -455,13 +455,13 @@ During live events:
   - reroute toward alternative exits
   - apply temporary restrictions
 
-🚨 **Important:**  
+ **Important:**  
 The AI does **not** act autonomously.  
 Final decisions remain with human operators, matching real-world safety systems like air-traffic control and emergency response centers.
 
 ---
 
-### 3️⃣ Emergency Response & Post-Incident Analysis
+### 3️ Emergency Response & Post-Incident Analysis
 
 When emergency triggers occur:
 
@@ -481,7 +481,7 @@ This supports **accountability, audits, and continuous improvement**.
 
 ---
 
-## 📈 Scalability & Growth Handling
+##  Scalability & Growth Handling
 
 The platform is designed to **scale gracefully**, from small venues to city-scale deployments.
 
@@ -509,13 +509,13 @@ This allows expansion from:
 
 ---
 
-## 🚨 Failure Prevention & Safety Guarantees
+##  Failure Prevention & Safety Guarantees
 
 The system is explicitly designed to **fail safely**, never catastrophically.
 
 ---
 
-### 1️⃣ Advisory-First Architecture
+### 1️ Advisory-First Architecture
 
 - AI recommendations do **not** directly control the environment
 - No single model failure can cause physical harm
@@ -525,7 +525,7 @@ If the AI fails → **baseline monitoring continues normally**.
 
 ---
 
-### 2️⃣ Bounded Interventions (Future Phases)
+### 2️ Bounded Interventions (Future Phases)
 
 When limited automation is introduced:
 - Actions are:
@@ -541,7 +541,7 @@ There is **no possibility of runaway behavior** by design.
 
 ---
 
-### 3️⃣ Graceful Degradation
+### 3️ Graceful Degradation
 
 If any subsystem fails:
 
@@ -555,18 +555,18 @@ There is **no single point of catastrophic failure**.
 
 ---
 
-## 🧠 Avoiding Common AI Failure Modes
+##  Avoiding Common AI Failure Modes
 
 The platform intentionally avoids known AI risks:
 
-### ❌ No Over-Automation
+###  No Over-Automation
 - No hidden control loops
 - No autonomous physical actions
 - No black-box decisions without explanations
 
 ---
 
-### ❌ No Metric Gaming
+###  No Metric Gaming
 - Advisory systems are **not falsely credited** with physical improvements
 - Evaluation cleanly separates:
   - detection quality
@@ -575,7 +575,7 @@ The platform intentionally avoids known AI risks:
 
 ---
 
-### ❌ No Silent Model Drift
+###  No Silent Model Drift
 - Multi-seed evaluation
 - Reproducible scenario replay
 - Versioned models with downloadable reports
@@ -584,7 +584,7 @@ This ensures **long-term reliability**, not short-term demos.
 
 ---
 
-## ⚖️ Ethical & Regulatory Alignment
+##  Ethical & Regulatory Alignment
 
 The platform aligns with real-world public-safety requirements:
 
